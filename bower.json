@@ -1,0 +1,19 @@
+{
+  "name": "imqb",
+  "version": "0.0.1",
+  "homepage": "https://github.com/joshkh/im-querybuilder",
+  "authors": [
+    "Joshua Heimbach <joshkh@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "bootstrap-sass-official": "~3.3.5"
+  }
+}

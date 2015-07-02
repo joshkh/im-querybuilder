@@ -1,7 +1,7 @@
 _ = require 'underscore'
 Backbone = require 'backbone'
 log = require './utils/log'
-$ = require 'jquery'
+$ = Backbone.$
 
 pkg = require '../package.json'
 
@@ -12,6 +12,7 @@ CoreView = require './views/core-view'
 class MainView extends CoreView
 
 	initialize: (opts) ->
+		log.debug "Backbone.$", Backbone.$
 		log.debug "IMQB #{pkg.version}"
 
 	load: (opts) ->

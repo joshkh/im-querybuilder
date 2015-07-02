@@ -6,14 +6,14 @@ module.exports = ->
 				expand: true
 				flatten: false
 				cwd: 'src'
-				src: ['**/*.coffee', 'package.json']
+				src: ['**/*.coffee']
 				dest: '.tmp/src'
 				ext: '.js'
 
 		browserify:
 			dist:
 				src: '.tmp/src/app.js'
-				dest: 'build/app.js'
+				dest: 'dist/imqb.js'
 				options:
 					transform: ['jstify']
 					browserifyOptions:
@@ -25,9 +25,13 @@ module.exports = ->
 					{expand: true, src: ['src/templates/**'], dest: '.tmp/'},
 					{expand: true, src: ['package.json'], dest: '.tmp/'}
 				]
+			build:
+				files: [
+					{expand: true, src: ['./build/*'], dest: "dist/"}
+				]
 
 		clean:
-			build: ["build"]
+			all: ["dist", "build", ".tmp"]
 
 		connect:
 			all:
@@ -38,6 +42,23 @@ module.exports = ->
 			coffee:
 				files: 'src/**'
 				tasks: ['build']
+			css:
+				files: 'sass/**'
+				tasks: ['sass']
+
+		sass:
+			dev:
+				options: {style: 'expanded', compass: false}
+				files:
+					'dist/imqb.css': 'sass/style.scss'
+
+		uglify:
+			options:
+				mangle: false
+			main:
+				files:
+					'dist/imqb.min.js': 'dist/imqb.js'
+
 
 	@loadNpmTasks "grunt-contrib-coffee"
 	@loadNpmTasks "grunt-browserify"
@@ -45,8 +66,17 @@ module.exports = ->
 	@loadNpmTasks "grunt-contrib-clean"
 	@loadNpmTasks "grunt-contrib-watch"
 	@loadNpmTasks "grunt-contrib-copy"
+	@loadNpmTasks "grunt-contrib-sass"
+	@loadNpmTasks "grunt-contrib-uglify"
 
-	@registerTask "default", ["watch"]
+
+
+	@registerTask "default", ["serve"]
+
+	@registerTask "build", ["clean:main"]
+
+	@registerTask "dev", [""]
 	@registerTask "serve", ["build", "connect", "watch"]
-	@registerTask "build", ["clean:build", "copy:main", "coffee", "browserify:dist"]
-	@registerTask "clean", ["clean:all"]
+	@registerTask "build", ["clean:main", "copy:main", "coffee", "browserify:dist", "uglify:main"]
+
+

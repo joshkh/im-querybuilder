@@ -1,5 +1,5 @@
 enabled = true
-context = "𝖎𝖒-𝖖𝖇  "
+context = "𝖎𝖒𝖖𝖇  "
 
 
 module.exports = alias =
