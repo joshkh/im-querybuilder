@@ -70,13 +70,18 @@ module.exports = ->
 	@loadNpmTasks "grunt-contrib-uglify"
 
 
+	@registerTask "build", [
+		"clean:all", 	# Clean our build directories
+		"copy:main", 	# Copy assets to tmp folder
+		"coffee", 		# Transcompile our coffeescript to js
+		"browserify:dist",
+		"sass:dev"
+	]
 
-	@registerTask "default", ["serve"]
-
-	@registerTask "build", ["clean:main"]
-
-	@registerTask "dev", [""]
-	@registerTask "serve", ["build", "connect", "watch"]
-	@registerTask "build", ["clean:main", "copy:main", "coffee", "browserify:dist", "uglify:main"]
 
 
+	@registerTask "dev", [
+		"build",
+		"connect",
+		"watch"
+	]

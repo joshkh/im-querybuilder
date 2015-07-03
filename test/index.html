@@ -10,11 +10,27 @@
   <body>
   	<div id="querybuilder"></div>
   	<script>
+
   		var imqb = new imqb();
-  		var options = {
-  			el: "#querybuilder"
-  		}
-  		imqb.load(options);
+
+      var element = "#querybuilder";
+      var service = {root: 'http://www.flymine.org/query/service', token: "iamatoken"};
+
+      var query     = {
+        from: 'Gene',
+        select: [
+          'exons.symbol',
+          'chromosome.primaryIdentifier',
+          'exons.chromosomeLocation.start',
+          'exons.chromosomeLocation.end'
+        ],
+        where: {
+          symbol: 'eve',
+          organism: {lookup: 'D. melanogaster'}}
+      };
+
+  		imqb.load(element, {service: service, query: query});
+
   	</script>    
   </body>
 </html>
