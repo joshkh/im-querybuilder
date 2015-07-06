@@ -7319,5 +7319,18 @@ button.close {
     display: none !important;
   }
 }
+.querybox {
+  background: grey;
+  height: 500px;
+}
+
+.centeredAll {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+}
 
 /*# sourceMappingURL=imqb.css.map */
