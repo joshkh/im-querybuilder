@@ -6,4 +6,4 @@ describe "Quantity Model", ->
 	it "should have default values", ->
 
 		m = new QuantityModel()
-		m.get('quantities').should.be.an('string')
+		m.get('quantities').should.be.an('array')

@@ -26,6 +26,8 @@ module.exports={
     "grunt-contrib-sass": "^0.9.2",
     "grunt-contrib-uglify": "^0.9.1",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-test": "^0.12.7",
+    "grunt-notify": "^0.4.1",
     "imjs": "^3.14.0",
     "jquery": "^2.1.4",
     "jstify": "^0.11.0",
@@ -37,7 +39,7 @@ module.exports={
 
 },{}],2:[function(require,module,exports){
 (function() {
-  var $, Backbone, CoreView, MainView, PathModel, PathView, Q, QuantityModel, StartingPointView, _, imjs, log, pkg, template,
+  var $, Backbone, CoreView, MainView, PathModel, PathView, Q, QuantityModel, QueryBlock, StartingPointView, _, imjs, log, pkg, template,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -63,6 +65,8 @@ module.exports={
 
   PathView = require('./views/PathView');
 
+  QueryBlock = require('./views/QueryBlock');
+
   QuantityModel = require('./models/QuantityModel');
 
   PathModel = require('./models/PathModel');
@@ -80,24 +84,24 @@ module.exports={
 
     MainView.prototype.load = function(element, options) {
       var flymine, that;
-      this.el = $(element);
+      console.log("Loading");
+      this.$el = $(element);
       this.render();
       flymine = new imjs.Service(options.service);
       that = 123;
       return flymine.fetchModel().then((function(_this) {
         return function(immodel) {
-          return setTimeout(function() {
-            var pathinfo, pm;
-            pathinfo = immodel.makePath("Gene");
-            pm = new PathModel(pathinfo);
-            return console.log("pm is", pm);
-          }, 2000);
+          var genePathInfo, qb, queryblocksdiv;
+          queryblocksdiv = _this.$(".imqb.queryblocks");
+          genePathInfo = immodel.makePath("Gene");
+          qb = new QueryBlock(genePathInfo);
+          return queryblocksdiv.append(qb.render());
         };
       })(this));
     };
 
     MainView.prototype.render = function() {
-      return this.el.html(template({
+      return this.$el.html(template({
         version: pkg.version
       }));
     };
@@ -110,7 +114,36 @@ module.exports={
 
 }).call(this);
 
-},{"../package.json":1,"./models/PathModel":4,"./models/QuantityModel":5,"./templates/main.tpl":6,"./utils/log":9,"./views/PathView":10,"./views/StartingPointView":11,"./views/core-view":12,"backbone":13,"imjs":56,"q":70,"underscore":71}],3:[function(require,module,exports){
+},{"../package.json":1,"./models/PathModel":5,"./models/QuantityModel":6,"./templates/main.tpl":7,"./utils/log":11,"./views/PathView":12,"./views/QueryBlock":13,"./views/StartingPointView":14,"./views/core-view":15,"backbone":16,"imjs":59,"q":73,"underscore":74}],3:[function(require,module,exports){
+(function() {
+  var AttributeCollection, Backbone, PathModel, _,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  Backbone = require('backbone');
+
+  _ = require('underscore');
+
+  PathModel = require('../models/PathModel');
+
+  AttributeCollection = (function(superClass) {
+    extend(AttributeCollection, superClass);
+
+    function AttributeCollection() {
+      return AttributeCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    AttributeCollection.prototype.model = PathModel;
+
+    return AttributeCollection;
+
+  })(Backbone.Collection);
+
+  module.exports = AttributeCollection;
+
+}).call(this);
+
+},{"../models/PathModel":5,"backbone":16,"underscore":74}],4:[function(require,module,exports){
 (function() {
   var Backbone, CoreModel, imjs,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -139,9 +172,9 @@ module.exports={
 
 }).call(this);
 
-},{"backbone":13,"imjs":56}],4:[function(require,module,exports){
+},{"backbone":16,"imjs":59}],5:[function(require,module,exports){
 (function() {
-  var BOOLEAN_TYPES, Backbone, NUMERIC_TYPES, PathModel, _, ref,
+  var BOOLEAN_TYPES, Backbone, NUMERIC_TYPES, PathModel, Q, _, ref,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty,
     indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -150,6 +183,8 @@ module.exports={
 
   _ = require('underscore');
 
+  Q = require('q');
+
   ref = require('imjs').Model, NUMERIC_TYPES = ref.NUMERIC_TYPES, BOOLEAN_TYPES = ref.BOOLEAN_TYPES;
 
   PathModel = (function(superClass) {
@@ -157,9 +192,10 @@ module.exports={
 
     PathModel.prototype.defaults = function() {
       return {
+        human: "default",
         path: null,
         type: null,
-        displayName: null,
+        displayName: "default",
         typeName: null,
         parts: [],
         isNumeric: false,
@@ -170,6 +206,8 @@ module.exports={
     };
 
     function PathModel(path) {
+      var deferred;
+      deferred = Q.defer();
       PathModel.__super__.constructor.call(this);
       this.set(this.pathAttributes(path));
       this.setDisplayName(path);
@@ -179,9 +217,14 @@ module.exports={
     PathModel.prototype.setDisplayName = function(path) {
       return path.getDisplayName().then((function(_this) {
         return function(name) {
-          return _this.set({
+          var split;
+          split = name.split(' > ');
+          _this.set({
             displayName: name,
-            parts: name.split(' > ')
+            parts: split
+          });
+          return _this.set({
+            human: split[split.length - 1]
           });
         };
       })(this));
@@ -189,7 +232,6 @@ module.exports={
 
     PathModel.prototype.setTypeName = function(path) {
       var type;
-      console.log("setting type name");
       type = (path.isAttribute() ? path.getParent() : path).getType();
       return type.getDisplayName().then((function(_this) {
         return function(name) {
@@ -208,7 +250,8 @@ module.exports={
       attrs = {
         id: (isAttr ? str : str + ".id"),
         path: str,
-        type: (ref1 = type.name) != null ? ref1 : type
+        type: (ref1 = type.name) != null ? ref1 : type,
+        pathinfo: path
       };
       if (isAttr) {
         attrs.isNumeric = (indexOf.call(NUMERIC_TYPES, type) >= 0);
@@ -228,7 +271,7 @@ module.exports={
 
 }).call(this);
 
-},{"backbone":13,"imjs":56,"underscore":71}],5:[function(require,module,exports){
+},{"backbone":16,"imjs":59,"q":73,"underscore":74}],6:[function(require,module,exports){
 (function() {
   var CoreModel, QuantityModel, imjs,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -261,19 +304,19 @@ module.exports={
 
 }).call(this);
 
-},{"./CoreModel":3,"imjs":56}],6:[function(require,module,exports){
+},{"./CoreModel":4,"imjs":59}],7:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
 __p+='<div class="jumbotron"> <div class="container"> <h1>im-querybuilder <span class="badge">version '+
 ((__t=( version ))==null?'':__t)+
-'</span></h1> </div> </div> <section class="centeredAll"> <p>Starting with a ... <input type="text" class="form-control"></p> </section>';
+'</span></h1> </div> </div>  <div class="row imqb queryblocks"> </div> ';
 }
 return __p;
 };
 
-},{"underscore":71}],7:[function(require,module,exports){
+},{"underscore":74}],8:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
@@ -289,7 +332,25 @@ __p+=' </select> </div>';
 return __p;
 };
 
-},{"underscore":71}],8:[function(require,module,exports){
+},{"underscore":74}],9:[function(require,module,exports){
+var _ = require('underscore');
+module.exports = function(obj){
+var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
+with(obj||{}){
+__p+='<div class="panel panel-default"> <div class="panel-heading"> <h3 class="panel-title">'+
+((__t=( model.get("displayName") ))==null?'':__t)+
+'</h3> </div> <div class="panel-body"> ';
+ collection.each(function(next) { 
+__p+=' <span class="badge"> '+
+((__t=( next.get("human")))==null?'':__t)+
+'</span><br> ';
+ }) 
+__p+=' </div> </div>';
+}
+return __p;
+};
+
+},{"underscore":74}],10:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
@@ -299,7 +360,7 @@ __p+='<section class="row"> Starting with a... </section>';
 return __p;
 };
 
-},{"underscore":71}],9:[function(require,module,exports){
+},{"underscore":74}],11:[function(require,module,exports){
 (function() {
   var context, enabled;
 
@@ -309,7 +370,7 @@ return __p;
 
 }).call(this);
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 (function() {
   var Backbone, PathView, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -348,7 +409,75 @@ return __p;
 
 }).call(this);
 
-},{"../templates/pathview.tpl":7,"backbone":13,"underscore":71}],11:[function(require,module,exports){
+},{"../templates/pathview.tpl":8,"backbone":16,"underscore":74}],13:[function(require,module,exports){
+(function() {
+  var $, AttributeCollection, Backbone, PathModel, PathView, QueryBlock, _,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  _ = require('underscore');
+
+  Backbone = require('backbone');
+
+  PathView = require('./PathView');
+
+  $ = Backbone.$;
+
+  PathModel = require('../models/PathModel');
+
+  AttributeCollection = require('../collections/AttributeCollection');
+
+  QueryBlock = (function(superClass) {
+    extend(QueryBlock, superClass);
+
+    QueryBlock.prototype.template = require('../templates/queryblock.tpl');
+
+    QueryBlock.prototype.tagName = "div";
+
+    QueryBlock.prototype.className = "queryblock";
+
+    function QueryBlock(path) {
+      this.collection = new AttributeCollection;
+      this.model = new PathModel(path);
+      this.getAttributes(path);
+      this.listenTo(this.model, "change", this.render);
+      QueryBlock.__super__.constructor.call(this);
+    }
+
+    QueryBlock.prototype.initialize = function() {
+      return this.collection.on("change", this.render, this);
+    };
+
+    QueryBlock.prototype.getAttributes = function(path) {
+      var childnodes;
+      childnodes = path.getChildNodes();
+      return _.each(childnodes, (function(_this) {
+        return function(node) {
+          if (node.isAttribute() === true) {
+            return _this.collection.add(node);
+          }
+        };
+      })(this));
+    };
+
+    QueryBlock.prototype.render = function() {
+      var results;
+      results = this.template({
+        model: this.model,
+        collection: this.collection
+      });
+      return this.$el.html(results);
+    };
+
+    return QueryBlock;
+
+  })(Backbone.View);
+
+  module.exports = QueryBlock;
+
+}).call(this);
+
+},{"../collections/AttributeCollection":3,"../models/PathModel":5,"../templates/queryblock.tpl":9,"./PathView":12,"backbone":16,"underscore":74}],14:[function(require,module,exports){
 (function() {
   var Backbone, StartingPointView, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -391,7 +520,7 @@ return __p;
 
 }).call(this);
 
-},{"../templates/startingpoint.tpl":8,"backbone":13,"underscore":71}],12:[function(require,module,exports){
+},{"../templates/startingpoint.tpl":10,"backbone":16,"underscore":74}],15:[function(require,module,exports){
 (function() {
   var Backbone, CoreView, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -418,7 +547,7 @@ return __p;
 
 }).call(this);
 
-},{"backbone":13,"underscore":71}],13:[function(require,module,exports){
+},{"backbone":16,"underscore":74}],16:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.2.1
 
@@ -2295,7 +2424,7 @@ return __p;
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":69,"underscore":14}],14:[function(require,module,exports){
+},{"jquery":72,"underscore":17}],17:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -3845,9 +3974,9 @@ return __p;
   }
 }.call(this));
 
-},{}],15:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 
-},{}],16:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -5283,7 +5412,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":17,"ieee754":18,"is-array":19}],17:[function(require,module,exports){
+},{"base64-js":20,"ieee754":21,"is-array":22}],20:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -5409,7 +5538,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -5495,7 +5624,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 
 /**
  * isArray
@@ -5530,7 +5659,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -5833,7 +5962,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -5979,7 +6108,7 @@ http.STATUS_CODES = {
     510 : 'Not Extended',               // RFC 2774
     511 : 'Network Authentication Required' // RFC 6585
 };
-},{"./lib/request":22,"events":20,"url":45}],22:[function(require,module,exports){
+},{"./lib/request":25,"events":23,"url":48}],25:[function(require,module,exports){
 var Stream = require('stream');
 var Response = require('./response');
 var Base64 = require('Base64');
@@ -6190,7 +6319,7 @@ var isXHR2Compatible = function (obj) {
     if (typeof FormData !== 'undefined' && obj instanceof FormData) return true;
 };
 
-},{"./response":23,"Base64":24,"inherits":25,"stream":43}],23:[function(require,module,exports){
+},{"./response":26,"Base64":27,"inherits":28,"stream":46}],26:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -6312,7 +6441,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":43,"util":47}],24:[function(require,module,exports){
+},{"stream":46,"util":50}],27:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -6374,7 +6503,7 @@ var isArray = Array.isArray || function (xs) {
 
 }());
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -6399,12 +6528,12 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],26:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],27:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -6496,7 +6625,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],28:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.3.2 by @mathias */
 ;(function(root) {
@@ -7030,7 +7159,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7116,7 +7245,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],30:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7203,16 +7332,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],31:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":29,"./encode":30}],32:[function(require,module,exports){
+},{"./decode":32,"./encode":33}],35:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":33}],33:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":36}],36:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -7305,7 +7434,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":35,"./_stream_writable":37,"_process":27,"core-util-is":38,"inherits":25}],34:[function(require,module,exports){
+},{"./_stream_readable":38,"./_stream_writable":40,"_process":30,"core-util-is":41,"inherits":28}],37:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -7353,7 +7482,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":36,"core-util-is":38,"inherits":25}],35:[function(require,module,exports){
+},{"./_stream_transform":39,"core-util-is":41,"inherits":28}],38:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -8308,7 +8437,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":33,"_process":27,"buffer":16,"core-util-is":38,"events":20,"inherits":25,"isarray":26,"stream":43,"string_decoder/":44,"util":15}],36:[function(require,module,exports){
+},{"./_stream_duplex":36,"_process":30,"buffer":19,"core-util-is":41,"events":23,"inherits":28,"isarray":29,"stream":46,"string_decoder/":47,"util":18}],39:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8519,7 +8648,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":33,"core-util-is":38,"inherits":25}],37:[function(require,module,exports){
+},{"./_stream_duplex":36,"core-util-is":41,"inherits":28}],40:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9000,7 +9129,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":33,"_process":27,"buffer":16,"core-util-is":38,"inherits":25,"stream":43}],38:[function(require,module,exports){
+},{"./_stream_duplex":36,"_process":30,"buffer":19,"core-util-is":41,"inherits":28,"stream":46}],41:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9110,10 +9239,10 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":16}],39:[function(require,module,exports){
+},{"buffer":19}],42:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":34}],40:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":37}],43:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = require('stream');
 exports.Readable = exports;
@@ -9122,13 +9251,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":33,"./lib/_stream_passthrough.js":34,"./lib/_stream_readable.js":35,"./lib/_stream_transform.js":36,"./lib/_stream_writable.js":37,"stream":43}],41:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":36,"./lib/_stream_passthrough.js":37,"./lib/_stream_readable.js":38,"./lib/_stream_transform.js":39,"./lib/_stream_writable.js":40,"stream":46}],44:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":36}],42:[function(require,module,exports){
+},{"./lib/_stream_transform.js":39}],45:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":37}],43:[function(require,module,exports){
+},{"./lib/_stream_writable.js":40}],46:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9257,7 +9386,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":20,"inherits":25,"readable-stream/duplex.js":32,"readable-stream/passthrough.js":39,"readable-stream/readable.js":40,"readable-stream/transform.js":41,"readable-stream/writable.js":42}],44:[function(require,module,exports){
+},{"events":23,"inherits":28,"readable-stream/duplex.js":35,"readable-stream/passthrough.js":42,"readable-stream/readable.js":43,"readable-stream/transform.js":44,"readable-stream/writable.js":45}],47:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9480,7 +9609,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":16}],45:[function(require,module,exports){
+},{"buffer":19}],48:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10189,14 +10318,14 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":28,"querystring":31}],46:[function(require,module,exports){
+},{"punycode":31,"querystring":34}],49:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],47:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10786,7 +10915,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":46,"_process":27,"inherits":25}],48:[function(require,module,exports){
+},{"./support/isBuffer":49,"_process":30,"inherits":28}],51:[function(require,module,exports){
 (function() {
   exports.ACCEPT_HEADER = {
     'xml': 'application/xml',
@@ -10811,7 +10940,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{}],49:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, JSONStream, PESKY_COMMA, URL, URLENC, USER_AGENT, VERSION, blocking, defer, error, getMsg, http, invoke, merge, parseOptions, rejectAfter, streaming, utils, _ref;
 
@@ -11040,7 +11169,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./constants":48,"./util":60,"./version":61,"JSONStream":63,"http":21,"url":45}],50:[function(require,module,exports){
+},{"./constants":51,"./util":63,"./version":64,"JSONStream":66,"http":24,"url":48}],53:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -11340,7 +11469,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":60}],51:[function(require,module,exports){
+},{"./util":63}],54:[function(require,module,exports){
 (function() {
   var INVITES, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, get, getFolderName, intermine, invoke, isFolder, merge, set, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -11530,7 +11659,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":60}],52:[function(require,module,exports){
+},{"./util":63}],55:[function(require,module,exports){
 (function() {
   var JAVA_LANG_OBJ, Model, PathInfo, Table, error, find, flatten, intermine, omap, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -11669,7 +11798,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./path":53,"./table":58,"./util":60}],53:[function(require,module,exports){
+},{"./path":56,"./table":61,"./util":63}],56:[function(require,module,exports){
 (function() {
   var NAMES, PARSED, PathInfo, any, concatMap, copy, error, get, intermine, makeKey, set, success, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -11912,7 +12041,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":60}],54:[function(require,module,exports){
+},{"./util":63}],57:[function(require,module,exports){
 (function() {
   var Promise;
 
@@ -11922,7 +12051,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"es6-promise":68}],55:[function(require,module,exports){
+},{"es6-promise":71}],58:[function(require,module,exports){
 (function() {
   var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, stringifySortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -13747,7 +13876,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":60,"./xml":62,"backbone-events-standalone":67}],56:[function(require,module,exports){
+},{"./util":63,"./xml":65,"backbone-events-standalone":70}],59:[function(require,module,exports){
 (function() {
   var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -14769,7 +14898,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./http":49,"./id-resolution-job":50,"./lists":51,"./model":52,"./promise":54,"./query":55,"./user":59,"./util":60,"./version":61}],57:[function(require,module,exports){
+},{"./http":52,"./id-resolution-job":53,"./lists":54,"./model":55,"./promise":57,"./query":58,"./user":62,"./util":63,"./version":64}],60:[function(require,module,exports){
 (function (global){
 (function() {
   var FakeDomParser;
@@ -14786,7 +14915,7 @@ function hasOwnProperty(obj, prop) {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],58:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 (function() {
   var Promise, merge, properties,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -14864,7 +14993,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./promise":54}],59:[function(require,module,exports){
+},{"./promise":57}],62:[function(require,module,exports){
 (function() {
   var any, do_pref_req, error, get, isFunction, withCB, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -14962,7 +15091,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":60}],60:[function(require,module,exports){
+},{"./util":63}],63:[function(require,module,exports){
 (function() {
   var Promise, REQUIRES, comp, curry, encode, entities, error, flatten, fold, id, invoke, invokeWith, isArray, merge, pairFold, qsFromList, root, success, thenFold, _ref,
     __slice = [].slice,
@@ -15457,13 +15586,13 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./promise":54}],61:[function(require,module,exports){
+},{"./promise":57}],64:[function(require,module,exports){
 (function() {
   exports.VERSION = '3.14.0';
 
 }).call(this);
 
-},{}],62:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 (function() {
   var DOMParser, sanitize;
 
@@ -15504,7 +15633,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"xmldom":57}],63:[function(require,module,exports){
+},{"xmldom":60}],66:[function(require,module,exports){
 (function (process,Buffer){
 
 
@@ -15701,7 +15830,7 @@ if(!module.parent && process.title !== 'browser') {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":27,"buffer":16,"jsonparse":64,"through":65}],64:[function(require,module,exports){
+},{"_process":30,"buffer":19,"jsonparse":67,"through":68}],67:[function(require,module,exports){
 (function (Buffer){
 /*global Buffer*/
 // Named constants with unique integer values
@@ -16106,7 +16235,7 @@ proto.onToken = function (token, value) {
 module.exports = Parser;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":16}],65:[function(require,module,exports){
+},{"buffer":19}],68:[function(require,module,exports){
 (function (process){
 var Stream = require('stream')
 
@@ -16218,7 +16347,7 @@ function through (write, end, opts) {
 
 
 }).call(this,require('_process'))
-},{"_process":27,"stream":43}],66:[function(require,module,exports){
+},{"_process":30,"stream":46}],69:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -16496,10 +16625,10 @@ function through (write, end, opts) {
   }
 })(this);
 
-},{}],67:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 module.exports = require('./backbone-events-standalone');
 
-},{"./backbone-events-standalone":66}],68:[function(require,module,exports){
+},{"./backbone-events-standalone":69}],71:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -17475,7 +17604,7 @@ module.exports = require('./backbone-events-standalone');
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":27}],69:[function(require,module,exports){
+},{"_process":30}],72:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -26687,7 +26816,7 @@ return jQuery;
 
 }));
 
-},{}],70:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -28739,7 +28868,7 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":27}],71:[function(require,module,exports){
-arguments[4][14][0].apply(exports,arguments)
-},{"dup":14}]},{},[2])(2)
+},{"_process":30}],74:[function(require,module,exports){
+arguments[4][17][0].apply(exports,arguments)
+},{"dup":17}]},{},[2])(2)
 });

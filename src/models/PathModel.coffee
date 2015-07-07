@@ -1,15 +1,16 @@
 Backbone  = require 'backbone'
 _         = require 'underscore'
-
+Q         = require 'q'
 
 {Model: {NUMERIC_TYPES, BOOLEAN_TYPES}} = require 'imjs'
 
 class PathModel extends Backbone.Model
 
   defaults: ->
+    human: "default"
     path: null
     type: null
-    displayName: null
+    displayName: "default"
     typeName: null
     parts: []
     isNumeric: false
@@ -18,6 +19,7 @@ class PathModel extends Backbone.Model
     isAttribute: true
 
   constructor: (path) ->
+    deferred = Q.defer()
     super()
     @set @pathAttributes path
     @setDisplayName path
@@ -25,10 +27,11 @@ class PathModel extends Backbone.Model
 
   setDisplayName: (path) ->
     path.getDisplayName().then (name) =>
-      @set displayName: name, parts: name.split(' > ')
+      split = name.split ' > '
+      @set displayName: name, parts: split
+      @set human: split[split.length - 1]
 
   setTypeName: (path) ->
-    console.log "setting type name"
     type = (if path.isAttribute() then path.getParent() else path).getType()
     type.getDisplayName().then (name) => @set typeName: name
 
@@ -40,6 +43,7 @@ class PathModel extends Backbone.Model
       id: (if isAttr then str else "#{ str }.id")
       path: str
       type: (type.name ? type)
+      pathinfo: path
 
     if isAttr
       attrs.isNumeric = (type in NUMERIC_TYPES)

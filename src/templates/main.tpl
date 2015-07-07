@@ -4,6 +4,11 @@
   </div>
 </div>
 
-<section class="centeredAll">
+<!-- Contains the query blocks -->
+<div class="row imqb queryblocks">
+
+</div>
+
+<!-- <section class="centeredAll">
   <p>Starting with a ... <input type="text" class="form-control"></p>
-</section>
+</section> -->

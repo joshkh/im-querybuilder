@@ -8,13 +8,16 @@
     <script src="../dist/imqb.js"></script>
   </head>
   <body>
+
   	<div id="querybuilder"></div>
+
+
   	<script>
 
   		var imqb = new imqb();
 
       var element = "#querybuilder";
-      var service = {root: 'http://www.flymine.org/query/service', token: "iamatoken"};
+      var service = {root: 'http://www.flymine.org/query/service'};
 
       var query     = {
         from: 'Gene',
@@ -31,6 +34,6 @@
 
   		imqb.load(element, {service: service, query: query});
 
-  	</script>    
+  	</script>
   </body>
 </html>

@@ -13,6 +13,7 @@ template = require './templates/main.tpl'
 CoreView 					= require './views/core-view'
 StartingPointView	= require './views/StartingPointView'
 PathView					= require './views/PathView'
+QueryBlock				= require './views/QueryBlock'
 QuantityModel 		= require './models/QuantityModel'
 PathModel					= require './models/PathModel'
 
@@ -24,8 +25,9 @@ class MainView extends CoreView
 
 
 	load: (element, options) ->
+		console.log "Loading"
 
-		@el = $(element)
+		@$el = $(element)
 		@render()
 
 		flymine = new imjs.Service options.service
@@ -34,35 +36,17 @@ class MainView extends CoreView
 
 		flymine.fetchModel().then (immodel) =>
 
-			setTimeout ->
-
-				pathinfo = immodel.makePath "Gene"
-				pm = new PathModel pathinfo
-				console.log "pm is", pm
-
-			, 2000
-			# childnodes = pathinfo.getChildNodes()
-			# console.log "childnodes", childnodes
-			#
-			# promises = childnodes.map (next) ->
-			# 	next.getDisplayName()
-			#
-			# Q.all(promises).then (names) ->
-			# 	console.log "names", names
+			queryblocksdiv = @.$(".imqb.queryblocks")
 
 
-			# pathinfo = immodel.makePath "Gene"
-			#
-			# debugger;
-			# pm = new PathModel {path: pathinfo}
-			# pv = new PathView {el: @el, model: pm}
-			# pv.render()
-			# console.log "pm is", pm
+			genePathInfo = immodel.makePath "Gene"
+			qb = new QueryBlock genePathInfo
+			queryblocksdiv.append qb.render()
 
 
 
 	render: ->
-		@el.html template {version: pkg.version}
+		@$el.html template {version: pkg.version}
 
 
 module.exports = MainView

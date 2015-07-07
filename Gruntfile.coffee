@@ -46,6 +46,11 @@ module.exports = ->
 				files: 'sass/**'
 				tasks: ['sass']
 
+		mochaTest:
+			test:
+				src: ['test/**/*.coffee']
+
+
 		sass:
 			dev:
 				options: {style: 'expanded', compass: false}
@@ -59,6 +64,12 @@ module.exports = ->
 				files:
 					'dist/imqb.min.js': 'dist/imqb.js'
 
+		notify:
+			build:
+				options:
+					title: "Build complete."
+					message: "Build complete."
+
 
 	@loadNpmTasks "grunt-contrib-coffee"
 	@loadNpmTasks "grunt-browserify"
@@ -68,14 +79,18 @@ module.exports = ->
 	@loadNpmTasks "grunt-contrib-copy"
 	@loadNpmTasks "grunt-contrib-sass"
 	@loadNpmTasks "grunt-contrib-uglify"
+	@loadNpmTasks "grunt-notify"
+	@loadNpmTasks "grunt-mocha-test"
 
 
 	@registerTask "build", [
-		"clean:all", 	# Clean our build directories
+		# "clean:all", 	# Clean our build directories
+		"mochaTest"
 		"copy:main", 	# Copy assets to tmp folder
 		"coffee", 		# Transcompile our coffeescript to js
 		"browserify:dist",
-		"sass:dev"
+		# "sass:dev",
+		"notify:build"
 	]
 
 
