@@ -43,19 +43,18 @@ module.exports = ->
 				files: 'src/**'
 				tasks: ['build']
 			css:
-				files: 'sass/**'
-				tasks: ['sass']
+				files: 'less/**'
+				tasks: ['less']
 
 		mochaTest:
 			test:
 				src: ['test/**/*.coffee']
 
 
-		sass:
+		less:
 			dev:
-				options: {style: 'expanded', compass: false}
 				files:
-					'dist/imqb.css': 'sass/style.scss'
+					'dist/imqb.css': 'less/style.less'
 
 		uglify:
 			options:
@@ -77,7 +76,7 @@ module.exports = ->
 	@loadNpmTasks "grunt-contrib-clean"
 	@loadNpmTasks "grunt-contrib-watch"
 	@loadNpmTasks "grunt-contrib-copy"
-	@loadNpmTasks "grunt-contrib-sass"
+	@loadNpmTasks "grunt-contrib-less"
 	@loadNpmTasks "grunt-contrib-uglify"
 	@loadNpmTasks "grunt-notify"
 	@loadNpmTasks "grunt-mocha-test"
