@@ -2,24 +2,85 @@
 // @import '../bower_components/Bootflat/bootflat/scss/bootflat';
 
 @import "../bower_components/bootstrap-less/less/bootstrap";
+@import "typeahead";
+@import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,600);
 
 
-// @
-.querybox {
-  background: grey;
-  height: 500px;
+@font-family-sans-serif: 'Open Sans', sans-serif;
+
+
+body {
+  background: #3D3527;
+}
+
+.debugconsole {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: #ECF0F1;
+    font-family: "Courier New", monospace;
+    padding: 5px;
+    overflow-y: scroll;
+    height: 50px;
+
 }
 
 
-.queryblock{
-  position:absolute;
-  width:300px;
-  height:300px;
-  align-items: center;
+
+// Bootstrap overrides
+// .dropdown-menu {
+//   background-color: #DB5600;
+//   border-radius: 0;
+//   color: white;
+//   li {
+//     a {color: white;}
+//     font-size: 24px;
+//   }
+// }
+
+
+
+.queryblock {
+  background-color: #DB5600;
+  color: white;
+  padding: 10px;
+  .heading {
+    font-size: 28px;
+  }
 }
 
-.flex{
-  background:blue;
-  flex:1;
-  display:flex;
+input[type=text] {
+	border: 0;
+	border-right: 1px solid rgba(255, 255, 255, 0.6);
+	border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+	border-left: 0px solid rgba(255, 255, 255, 0.6);
+	background: white;
+	background: transparent;
+  font-size: 28px;
+	color: white;
+	text-align: left;
+  outline: none;
 }
+
+
+// input[type=text]:focus {
+// 	/*background: #ECECEC;*/
+// 	border: 0;
+// 	border-right: 1px solid white;
+// 	border-bottom: 1px solid white;
+// 	border-left: 0px solid white;
+// 	padding: 5px;
+// 	background: white;
+// 	background: transparent;
+// 	/*background: white;*/
+// 	outline: none;
+// 	font-style: italic;
+// font-size: 28px;
+//
+//
+//
+// }
+
+
+
+//////////////////////////////////

@@ -9,6 +9,12 @@
 
 </div>
 
+
+
+<!-- <% if (debug) { %>
+  <div class="foot">look for me</div>
+<% } %> -->
+
 <!-- <section class="centeredAll">
   <p>Starting with a ... <input type="text" class="form-control"></p>
 </section> -->

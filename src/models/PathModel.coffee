@@ -54,28 +54,4 @@ class PathModel extends Backbone.Model
 
     return attrs
 
-
-    # @children()
-
-  # Get our children items
-  # children: ->
-  #   childnodes = @get("path").getChildNodes()
-  #   debugger;
-  #
-  #   tempattributes = []
-  #
-  #   _.each childnodes, (next) =>
-  #
-  #     displayName = next.getDisplayName()
-  #
-  #     @get("attributes").push next if next.isAttribute()
-  #     @get("collections").push next if next.isCollection()
-  #
-  #   console.log "this", @
-
-
-    # @set {children: @get("path").getChildNodes()}
-
-
-
 module.exports = PathModel

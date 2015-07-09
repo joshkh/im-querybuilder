@@ -1,3 +1,5 @@
+require '../shim'
+
 _ = require 'underscore'
 Backbone = require 'backbone'
 

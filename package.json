@@ -8,7 +8,11 @@
   },
   "author": "Joshua Heimbach",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "bootstrap": "^3.3.5",
+    "jquery": "^2.1.4",
+    "typeahead.js": "^0.11.1"
+  },
   "devDependencies": {
     "backbone": "^1.2.1",
     "bootstrap": "^3.3.5",

@@ -5,10 +5,13 @@ $ 				= Backbone.$
 imjs 			= require 'imjs'
 Q 				= require 'q'
 
+console.log "$", $
+
 
 pkg 		= require '../package.json'
 
 template = require './templates/main.tpl'
+debugtemplate = require './templates/debug.tpl'
 
 CoreView 					= require './views/core-view'
 StartingPointView	= require './views/StartingPointView'
@@ -17,36 +20,42 @@ QueryBlock				= require './views/QueryBlock'
 QuantityModel 		= require './models/QuantityModel'
 PathModel					= require './models/PathModel'
 
+bootstrap 		= require 'bootstrap'
+console.log "bootstrap is", bootstrap
+
+
+
 
 class MainView extends CoreView
 
 	initialize: (opts) ->
 		console.log "IMQB #{pkg.version}"
 
-
 	load: (element, options) ->
-		console.log "Loading"
 
+		# jQueryify our target element and render the shell
 		@$el = $(element)
 		@render()
+		@renderdebug()
 
+		# Set up our intitial query block:
 		flymine = new imjs.Service options.service
-
-		that = 123
 
 		flymine.fetchModel().then (immodel) =>
 
-			queryblocksdiv = @.$(".imqb.queryblocks")
-
-
-			genePathInfo = immodel.makePath "Gene"
+			genePathInfo = immodel.makePath "Protein"
 			qb = new QueryBlock genePathInfo
-			queryblocksdiv.append qb.render()
+			@queryblocksdiv.append qb.render()
 
 
+	renderdebug: ->
+		$('body').append debugtemplate {}
 
 	render: ->
-		@$el.html template {version: pkg.version}
+		@$el.html template {debug: true, version: pkg.version}
+
+		# Get our containers for rendering
+		@queryblocksdiv = @.$(".imqb.queryblocks")
 
 
 module.exports = MainView
