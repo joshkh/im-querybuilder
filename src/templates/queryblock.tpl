@@ -1,37 +1,51 @@
-<div class="row">
+<div class="flex-querybox-container">
 
-  <div class="queryblock">
-    <span class="heading">Starting with </span>
-    <input class="classes" type="text">
 
-    <span class="heading"> show me </span>
-    <input class="attributes" type="text">
+  <div class="column">
+
+    <span class="heading">Starting with a </span>
+
+    <div class="btn-group btn-input">
+      <!-- <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+        <%= root %> <span class="caret"></span>
+      </a> -->
+      <input type="text" class="dropdown-toggle classInputText" data-toggle="dropdown">
+
+      <ul class="dropdown-menu noflow" role="menu">
+        <% _.each(classes, function(next) { %>
+            <li><a data-classname="<%= next.name %>" class="classname" href="#"><%= next.name %></a></li/>
+        <% }); %>
+      </ul>
+    </div>
+
   </div>
+
+  <div class="column">
+    <span class="heading">Attributes</span>
+    <div class="flex-attribute-container">
+
+
+        <% _.each(attributes, function(next) { %>
+          <% var index = _.indexOf(selected, next.name); %>
+          <% if (index > -1) { %>
+            <div class="attribute toggleOn" data-attributename="<%= next.name %>"><%= next.name %><i class="fa fa-filter"></i></div>
+          <% } %>
+        <% }); %>
+        <% _.each(attributes, function(next) { %>
+          <% var index = _.indexOf(selected, next.name); %>
+          <% if (index == -1) { %>
+            <div class="attribute" data-attributename="<%= next.name %>"><%= next.name %><i class="fa fa-filter"></i></div>
+          <% } %>
+        <% }); %>
+    </div>
+  </div>
+
+  <div class="toolbox">
+    <div class="flex-tool-container">
+      <div class="addcollection"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></div>
+    </div>
+  </div>
+
+
 
 </div>
-
-
-<!-- <div class="panel panel-default">
-  <div class="panel-heading">
-    <h3 class="panel-title"><%= model.get("displayName") %></h3>
-  </div>
-  <div class="panel-body">
-    <% collection.each(function(next) { %>
-        <span class="badge"> <%= next.get("human")%></span><br />
-    <% }) %>
-  </div>
-  <div class="selectme">test</div>
-</div> -->
-
-
-<!-- <div class="queryblock">
-  <span class="heading">Starting with a </span>
-  <div class="btn-group btn-input">
-    <input type="text" class="dropdown-toggle form-control" data-toggle="dropdown">
-    <ul class="dropdown-menu" role="menu">
-      <% collection.each(function(next) { %>
-          <li><a href="#"><%= next.get("human")%></a></li/>
-      <% }) %>
-    </ul>
-  </div>
-</div> -->

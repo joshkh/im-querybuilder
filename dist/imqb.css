@@ -6568,26 +6568,108 @@ button.close {
   font-size: 28px;
   line-height: 24px;
 }
+html,
 body {
-  background: #3D3527;
+  background: #1f292e;
+  color: white;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
-.debugconsole {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  background: #ECF0F1;
-  font-family: "Courier New", monospace;
-  padding: 5px;
-  overflow-y: scroll;
-  height: 50px;
+.debug {
+  background: rgba(234, 214, 169, 0.29);
 }
-.queryblock {
-  background-color: #DB5600;
+.debug .query {
   color: white;
   padding: 10px;
+  font-family: "Courier New", monospace;
+  overflow-y: auto;
+  border: none;
+  background-color: transparent;
+  font-size: 9px;
 }
-.queryblock .heading {
-  font-size: 28px;
+.flex-container {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-content: stretch;
+  align-items: stretch;
+}
+.flex-container .flex-column {
+  order: 0;
+  flex: 1 1 auto;
+  align-self: auto;
+}
+.flex-container .flex-column-fixed {
+  width: 300px;
+  order: 0;
+  flex: 0 1 auto;
+  align-self: auto;
+}
+.dropdown-menu {
+  background-color: #afc1ca;
+  border-radius: 0;
+  color: white;
+}
+.dropdown-menu li {
+  font-size: 18px;
+}
+.dropdown-menu li a {
+  color: white;
+}
+.row {
+  margin: 0;
+}
+.flex-querybox-container {
+  max-width: 400px;
+  display: inline-flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  background-color: #314149;
+}
+.flex-querybox-container .column {
+  flex: 1 1 auto;
+}
+.flex-querybox-container .column .flex-attribute-container {
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-direction: row;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.flex-querybox-container .column .flex-attribute-container div {
+  flex: 1 1 auto;
+  background-color: #5a7887;
+  color: white;
+  padding: 3px;
+  margin: 3px;
+  text-align: center;
+}
+.flex-querybox-container .column .flex-attribute-container div.toggleOn {
+  background-color: white;
+  color: black;
+}
+.flex-querybox-container .toolbox {
+  flex: 1 1 auto;
+}
+.flex-querybox-container .toolbox .flex-tool-container {
+  display: flex;
+  justify-content: flex-end;
+  flex-direction: row;
+}
+.flex-querybox-container .toolbox .flex-tool-container div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background-color: #5a7887;
+  color: white;
+}
+.queryblocks:not:first-child {
+  margin-top: 50px;
 }
 input[type=text] {
   border: 0;
@@ -6600,4 +6682,9 @@ input[type=text] {
   color: white;
   text-align: left;
   outline: none;
+  width: 100%;
+}
+.noflow {
+  max-height: 300px;
+  overflow-y: scroll;
 }

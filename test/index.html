@@ -12,7 +12,10 @@
 
 
 
-  	<div id="querybuilder"></div>
+
+
+    <div id="querybuilder" style="height: 100%"></div>
+
 
 
 
@@ -24,20 +27,9 @@
       var element = "#querybuilder";
       var service = {root: 'http://www.flymine.org/query/service'};
 
-      var query     = {
-        from: 'Gene',
-        select: [
-          'exons.symbol',
-          'chromosome.primaryIdentifier',
-          'exons.chromosomeLocation.start',
-          'exons.chromosomeLocation.end'
-        ],
-        where: {
-          symbol: 'eve',
-          organism: {lookup: 'D. melanogaster'}}
-      };
 
-  		imqb.load(element, {service: service, query: query});
+
+  		imqb.load(element, {service: service});
 
   	</script>
   </body>

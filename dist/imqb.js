@@ -44,7 +44,7 @@ module.exports={
 
 },{}],2:[function(require,module,exports){
 (function() {
-  var $, Backbone, CoreView, MainView, PathModel, PathView, Q, QuantityModel, QueryBlock, StartingPointView, _, bootstrap, debugtemplate, imjs, log, pkg, template,
+  var $, Backbone, CoreView, MainView, PathModel, PathView, Q, QuantityModel, QueryBlock, QueryBlockModel, StartingPointView, _, bootstrap, debugtemplate, imjs, log, pkg, template,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -64,7 +64,7 @@ module.exports={
 
   pkg = require('../package.json');
 
-  template = require('./templates/main.tpl');
+  template = require('./templates/app.tpl');
 
   debugtemplate = require('./templates/debug.tpl');
 
@@ -79,6 +79,8 @@ module.exports={
   QuantityModel = require('./models/QuantityModel');
 
   PathModel = require('./models/PathModel');
+
+  QueryBlockModel = require('./models/QueryBlockModel');
 
   bootstrap = require('bootstrap');
 
@@ -96,19 +98,59 @@ module.exports={
     };
 
     MainView.prototype.load = function(element, options) {
-      var flymine;
+      var intermine, myquery, opts, sayCount, sayError;
       this.$el = $(element);
       this.render();
-      this.renderdebug();
-      flymine = new imjs.Service(options.service);
-      return flymine.fetchModel().then((function(_this) {
+      intermine = new imjs.Service(options.service);
+      intermine.fetchModel().then((function(_this) {
         return function(immodel) {
-          var genePathInfo, qb;
-          genePathInfo = immodel.makePath("Protein");
-          qb = new QueryBlock(genePathInfo);
-          return _this.queryblocksdiv.append(qb.render());
+          var qbv;
+          qbv = new QueryBlock({
+            model: new QueryBlockModel({
+              root: "Gene",
+              service: intermine,
+              immodel: immodel,
+              parentel: _this.$el
+            })
+          });
+          return _this.queryblocksdiv.append(qbv.render());
         };
       })(this));
+      myquery = {
+        'from': 'Gene',
+        'select': ['secondaryIdentifier', 'symbol', 'primaryIdentifier', 'organism.name'],
+        'orderBy': [
+          {
+            'path': 'secondaryIdentifier',
+            'direction': 'ASC'
+          }
+        ],
+        'where': [
+          {
+            'path': 'Gene',
+            'op': 'LOOKUP',
+            'value': 'ab*',
+            'extraValue': '',
+            'code': 'A'
+          }
+        ]
+      };
+      opts = {
+        "identifiers": ["eve", "zen", "bib"],
+        "type": "Gene",
+        "caseSensitive": true,
+        "wildCards": true,
+        "extra": "D. melanogaster"
+      };
+      intermine.query(myquery).then((function(_this) {
+        return function(aquery) {};
+      })(this));
+      sayCount = function(value) {
+        return console.log("value is", value);
+      };
+      return sayError = function(value) {
+        return console.log("error is", error);
+      };
     };
 
     MainView.prototype.renderdebug = function() {
@@ -120,7 +162,7 @@ module.exports={
         debug: true,
         version: pkg.version
       }));
-      return this.queryblocksdiv = this.$(".imqb.queryblocks");
+      return this.queryblocksdiv = this.$(".queryblocks");
     };
 
     return MainView;
@@ -131,7 +173,7 @@ module.exports={
 
 }).call(this);
 
-},{"../package.json":1,"./models/PathModel":6,"./models/QuantityModel":7,"./templates/debug.tpl":9,"./templates/main.tpl":10,"./utils/log":14,"./views/PathView":15,"./views/QueryBlock":16,"./views/StartingPointView":17,"./views/core-view":18,"backbone":19,"bootstrap":21,"imjs":75,"q":89,"underscore":91}],3:[function(require,module,exports){
+},{"../package.json":1,"./models/PathModel":6,"./models/QuantityModel":7,"./models/QueryBlockModel":8,"./templates/app.tpl":10,"./templates/debug.tpl":11,"./utils/log":15,"./views/PathView":16,"./views/QueryBlock":17,"./views/StartingPointView":18,"./views/core-view":19,"backbone":20,"bootstrap":22,"imjs":76,"q":90,"underscore":92}],3:[function(require,module,exports){
 (function() {
   var AttributeCollection, Backbone, PathModel, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -160,7 +202,7 @@ module.exports={
 
 }).call(this);
 
-},{"../models/PathModel":6,"backbone":19,"underscore":91}],4:[function(require,module,exports){
+},{"../models/PathModel":6,"backbone":20,"underscore":92}],4:[function(require,module,exports){
 (function() {
   var $, substringMatcher, typeahead;
 
@@ -190,7 +232,7 @@ module.exports={
 
 }).call(this);
 
-},{"jquery":88,"typeahead.js":90}],5:[function(require,module,exports){
+},{"jquery":89,"typeahead.js":91}],5:[function(require,module,exports){
 (function() {
   var Backbone, CoreModel, imjs,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -219,7 +261,7 @@ module.exports={
 
 }).call(this);
 
-},{"backbone":19,"imjs":75}],6:[function(require,module,exports){
+},{"backbone":20,"imjs":76}],6:[function(require,module,exports){
 (function() {
   var BOOLEAN_TYPES, Backbone, NUMERIC_TYPES, PathModel, Q, _, ref,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -318,7 +360,7 @@ module.exports={
 
 }).call(this);
 
-},{"backbone":19,"imjs":75,"q":89,"underscore":91}],7:[function(require,module,exports){
+},{"backbone":20,"imjs":76,"q":90,"underscore":92}],7:[function(require,module,exports){
 (function() {
   var CoreModel, QuantityModel, imjs,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -351,7 +393,90 @@ module.exports={
 
 }).call(this);
 
-},{"./CoreModel":5,"imjs":75}],8:[function(require,module,exports){
+},{"./CoreModel":5,"imjs":76}],8:[function(require,module,exports){
+(function() {
+  var Backbone, Q, QueryBlockModel, _,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  Backbone = require('backbone');
+
+  _ = require('underscore');
+
+  Q = require('q');
+
+  QueryBlockModel = (function(superClass) {
+    extend(QueryBlockModel, superClass);
+
+    QueryBlockModel.prototype.defaults = function() {
+      return {
+        root: "Gene",
+        attributes: [],
+        collections: [],
+        immodel: null,
+        query: null,
+        service: null,
+        selected: [],
+        children: [],
+        parent: null
+      };
+    };
+
+    QueryBlockModel.prototype.initialize = function() {
+      return this.on("change:root", this.setRoot, this);
+    };
+
+    function QueryBlockModel(opts) {
+      QueryBlockModel.__super__.constructor.apply(this, arguments);
+      this.setRoot();
+      if (this.get("query") == null) {
+        opts = {
+          root: this.get('root')
+        };
+        this.get("service").query(opts).then((function(_this) {
+          return function(queryobj) {
+            var constraint, val;
+            _this.set({
+              query: queryobj
+            });
+            val = _this.get("query").addToSelect(["symbol"]);
+            constraint = {
+              "path": "Gene",
+              "op": "LOOKUP",
+              "value": "ab*",
+              "extraValue": "",
+              "code": "A"
+            };
+            val.addConstraint(constraint);
+            _this.set({
+              query: val
+            });
+            return _this;
+          };
+        })(this));
+      }
+    }
+
+    QueryBlockModel.prototype.setRoot = function() {
+      var attributes, collections, rootclass;
+      console.log("setRoot", this);
+      rootclass = this.get('immodel').classes[this.get('root')];
+      attributes = rootclass.attributes, collections = rootclass.collections;
+      return this.set({
+        attributes: attributes,
+        collections: collections
+      });
+    };
+
+    return QueryBlockModel;
+
+  })(Backbone.Model);
+
+  module.exports = QueryBlockModel;
+
+}).call(this);
+
+},{"backbone":20,"q":90,"underscore":92}],9:[function(require,module,exports){
 (function (global){
 (function() {
   var $, Backbone, jQuery, oldjq;
@@ -379,7 +504,17 @@ module.exports={
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"backbone":19,"bootstrap":21,"jquery":88,"typeahead.js":90}],9:[function(require,module,exports){
+},{"backbone":20,"bootstrap":22,"jquery":89,"typeahead.js":91}],10:[function(require,module,exports){
+var _ = require('underscore');
+module.exports = function(obj){
+var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
+with(obj||{}){
+__p+='<div class="flex-container"> <div class="flex-column queryblocks"></div> <div class="flex-column-fixed debug"> <pre class="query">QueryHere</pre></div> </div> ';
+}
+return __p;
+};
+
+},{"underscore":92}],11:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
@@ -389,19 +524,7 @@ __p+='<div class="debugconsole"> imqb debug console<br> imqb debug console<br> i
 return __p;
 };
 
-},{"underscore":91}],10:[function(require,module,exports){
-var _ = require('underscore');
-module.exports = function(obj){
-var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
-with(obj||{}){
-__p+='<div class="jumbotron"> <div class="container"> <h1>im-querybuilder <span class="badge">version '+
-((__t=( version ))==null?'':__t)+
-'</span></h1> </div> </div>  <div class="row imqb queryblocks"> </div>  ';
-}
-return __p;
-};
-
-},{"underscore":91}],11:[function(require,module,exports){
+},{"underscore":92}],12:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
@@ -417,17 +540,53 @@ __p+=' </select> </div>';
 return __p;
 };
 
-},{"underscore":91}],12:[function(require,module,exports){
+},{"underscore":92}],13:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+='<div class="row"> <div class="queryblock"> <span class="heading">Starting with </span> <input class="classes" type="text"> <span class="heading"> show me </span> <input class="attributes" type="text"> </div> </div>  ';
+__p+='<div class="flex-querybox-container"> <div class="column"> <span class="heading">Starting with a </span> <div class="btn-group btn-input">  <input type="text" class="dropdown-toggle classInputText" data-toggle="dropdown"> <ul class="dropdown-menu noflow" role="menu"> ';
+ _.each(classes, function(next) { 
+__p+=' <li><a data-classname="'+
+((__t=( next.name ))==null?'':__t)+
+'" class="classname" href="#">'+
+((__t=( next.name ))==null?'':__t)+
+'</a></li> ';
+ }); 
+__p+=' </ul> </div> </div> <div class="column"> <span class="heading">Attributes</span> <div class="flex-attribute-container"> ';
+ _.each(attributes, function(next) { 
+__p+=' ';
+ var index = _.indexOf(selected, next.name); 
+__p+=' ';
+ if (index > -1) { 
+__p+=' <div class="attribute toggleOn" data-attributename="'+
+((__t=( next.name ))==null?'':__t)+
+'">'+
+((__t=( next.name ))==null?'':__t)+
+'<i class="fa fa-filter"></i></div> ';
+ } 
+__p+=' ';
+ }); 
+__p+=' ';
+ _.each(attributes, function(next) { 
+__p+=' ';
+ var index = _.indexOf(selected, next.name); 
+__p+=' ';
+ if (index == -1) { 
+__p+=' <div class="attribute" data-attributename="'+
+((__t=( next.name ))==null?'':__t)+
+'">'+
+((__t=( next.name ))==null?'':__t)+
+'<i class="fa fa-filter"></i></div> ';
+ } 
+__p+=' ';
+ }); 
+__p+=' </div> </div> <div class="toolbox"> <div class="flex-tool-container"> <div class="addcollection"><span class="glyphicon glyphicon-star" aria-hidden="true"></span></div> </div> </div> </div>';
 }
 return __p;
 };
 
-},{"underscore":91}],13:[function(require,module,exports){
+},{"underscore":92}],14:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
@@ -437,7 +596,7 @@ __p+='<section class="row"> Starting with a... </section>';
 return __p;
 };
 
-},{"underscore":91}],14:[function(require,module,exports){
+},{"underscore":92}],15:[function(require,module,exports){
 (function() {
   var context, enabled;
 
@@ -447,7 +606,7 @@ return __p;
 
 }).call(this);
 
-},{}],15:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function() {
   var Backbone, PathView, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -486,9 +645,9 @@ return __p;
 
 }).call(this);
 
-},{"../templates/pathview.tpl":11,"backbone":19,"underscore":91}],16:[function(require,module,exports){
+},{"../templates/pathview.tpl":12,"backbone":20,"underscore":92}],17:[function(require,module,exports){
 (function() {
-  var $, AttributeCollection, Backbone, PathModel, PathView, QueryBlock, TypeaheadSearch, _, typeahead,
+  var $, AttributeCollection, Backbone, PathModel, PathView, QueryBlock, QueryBlockModel, TypeaheadSearch, _, typeahead,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -508,6 +667,8 @@ return __p;
 
   TypeaheadSearch = require('../mixins/typeahead');
 
+  QueryBlockModel = require('../models/QueryBlockModel');
+
   typeahead = require('typeahead.js');
 
   QueryBlock = (function(superClass) {
@@ -517,57 +678,95 @@ return __p;
 
     QueryBlock.prototype.tagName = "div";
 
-    QueryBlock.prototype.className = "queryblock";
+    QueryBlock.prototype.events = {
+      "click .dropdown-menu li a": "setRoot",
+      "click .attribute": "toggleAttribute",
+      "click .addcollection": "runquery"
+    };
 
-    function QueryBlock(path) {
-      this.collection = new AttributeCollection;
-      this.model = new PathModel(path);
-      this.getAttributes(path);
-      this.listenTo(this.model, "change", this.render);
-      QueryBlock.__super__.constructor.call(this);
+    function QueryBlock() {
+      QueryBlock.__super__.constructor.apply(this, arguments);
     }
 
     QueryBlock.prototype.initialize = function() {
-      return this.collection.on("change", this.render, this);
+      return this.model.on('change', this.talk, this);
     };
 
-    QueryBlock.prototype.getAttributes = function(path) {
-      var childnodes;
-      childnodes = path.getChildNodes();
-      return _.each(childnodes, (function(_this) {
-        return function(node) {
-          if (node.isAttribute() === true) {
-            return _this.collection.add(node);
-          }
+    QueryBlock.prototype.talk = function(evt) {
+      return setTimeout((function(_this) {
+        return function() {
+          var debugwindow, parentel;
+          parentel = _this.model.get("parentel");
+          debugwindow = parentel.find(".query");
+          debugger;
+          return debugwindow.html(JSON.stringify(_this.model.get("query").toJSON(), null, 2));
         };
-      })(this));
+      })(this), 3000);
+    };
+
+    QueryBlock.prototype.runquery = function() {
+      return this.model.get("service").rows(this.model.get('query')).then(function(value) {
+        return console.log("value is", value);
+      });
+    };
+
+    QueryBlock.prototype.addCollection = function(evt) {
+      var newModel, parentel, qbv;
+      parentel = this.model.get("parentel");
+      this.queryblocksdiv = parentel.find(".imqb.queryblocks");
+      newModel = this.model.clone();
+      newModel.set({
+        parent: this.model
+      });
+      qbv = new QueryBlock({
+        model: newModel
+      });
+      return this.queryblocksdiv.append(qbv.render());
+    };
+
+    QueryBlock.prototype.toggleAttribute = function(evt) {
+      var attribute, index, selected;
+      attribute = evt.target.dataset.attributename;
+      selected = this.model.get('selected');
+      index = _.indexOf(selected, attribute);
+      if (index > -1) {
+        this.model.set('selected', _.without(selected, attribute));
+      } else {
+        selected.push(attribute);
+        this.model.set('selected', selected);
+      }
+      return this.render();
+    };
+
+    QueryBlock.prototype.setRoot = function(evt) {
+      this.model.set({
+        root: evt.target.dataset.classname
+      });
+      return this.render();
     };
 
     QueryBlock.prototype.render = function() {
-      var results;
+      var attributes, classes, collections, parent, results, root, selected;
+      console.log("rendering as", this);
+      collections = this.model.get("collections");
+      attributes = this.model.get("attributes");
+      root = this.model.get("root");
+      parent = this.model.get("parent");
+      if (parent) {
+        classes = this.model.get('immodel').classes[root].collections;
+      } else {
+        classes = this.model.get('immodel').classes;
+      }
+      selected = this.model.get('selected');
       results = this.template({
-        model: this.model,
-        collection: this.collection
+        root: root,
+        classes: classes,
+        attributes: attributes,
+        collections: collections,
+        selected: selected
       });
       this.$el.html(results);
-      this.$('.classes').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 0
-      }, {
-        name: 'states',
-        source: TypeaheadSearch.substringMatcher(Array("Gene", "Protein"))
-      });
-      this.$('.attributes').typeahead({
-        hint: true,
-        highlight: true,
-        minLength: 0,
-        limit: 50
-      }, {
-        name: 'states',
-        source: TypeaheadSearch.substringMatcher(this.collection.pluck("human"))
-      });
-      this.$('.classes').focus();
+      this.$('.classInputText').val(root);
       return this.$el;
     };
 
@@ -579,7 +778,7 @@ return __p;
 
 }).call(this);
 
-},{"../collections/AttributeCollection":3,"../mixins/typeahead":4,"../models/PathModel":6,"../shim":8,"../templates/queryblock.tpl":12,"./PathView":15,"backbone":19,"typeahead.js":90,"underscore":91}],17:[function(require,module,exports){
+},{"../collections/AttributeCollection":3,"../mixins/typeahead":4,"../models/PathModel":6,"../models/QueryBlockModel":8,"../shim":9,"../templates/queryblock.tpl":13,"./PathView":16,"backbone":20,"typeahead.js":91,"underscore":92}],18:[function(require,module,exports){
 (function() {
   var Backbone, StartingPointView, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -624,7 +823,7 @@ return __p;
 
 }).call(this);
 
-},{"../shim":8,"../templates/startingpoint.tpl":13,"backbone":19,"underscore":91}],18:[function(require,module,exports){
+},{"../shim":9,"../templates/startingpoint.tpl":14,"backbone":20,"underscore":92}],19:[function(require,module,exports){
 (function() {
   var Backbone, CoreView, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -651,7 +850,7 @@ return __p;
 
 }).call(this);
 
-},{"backbone":19,"underscore":91}],19:[function(require,module,exports){
+},{"backbone":20,"underscore":92}],20:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.2.1
 
@@ -2528,7 +2727,7 @@ return __p;
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":88,"underscore":20}],20:[function(require,module,exports){
+},{"jquery":89,"underscore":21}],21:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -4078,7 +4277,7 @@ return __p;
   }
 }.call(this));
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 // This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
 require('../../js/transition.js')
 require('../../js/alert.js')
@@ -4092,7 +4291,7 @@ require('../../js/popover.js')
 require('../../js/scrollspy.js')
 require('../../js/tab.js')
 require('../../js/affix.js')
-},{"../../js/affix.js":22,"../../js/alert.js":23,"../../js/button.js":24,"../../js/carousel.js":25,"../../js/collapse.js":26,"../../js/dropdown.js":27,"../../js/modal.js":28,"../../js/popover.js":29,"../../js/scrollspy.js":30,"../../js/tab.js":31,"../../js/tooltip.js":32,"../../js/transition.js":33}],22:[function(require,module,exports){
+},{"../../js/affix.js":23,"../../js/alert.js":24,"../../js/button.js":25,"../../js/carousel.js":26,"../../js/collapse.js":27,"../../js/dropdown.js":28,"../../js/modal.js":29,"../../js/popover.js":30,"../../js/scrollspy.js":31,"../../js/tab.js":32,"../../js/tooltip.js":33,"../../js/transition.js":34}],23:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: affix.js v3.3.5
  * http://getbootstrap.com/javascript/#affix
@@ -4256,7 +4455,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: alert.js v3.3.5
  * http://getbootstrap.com/javascript/#alerts
@@ -4352,7 +4551,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: button.js v3.3.5
  * http://getbootstrap.com/javascript/#buttons
@@ -4474,7 +4673,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: carousel.js v3.3.5
  * http://getbootstrap.com/javascript/#carousel
@@ -4713,7 +4912,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],26:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: collapse.js v3.3.5
  * http://getbootstrap.com/javascript/#collapse
@@ -4926,7 +5125,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: dropdown.js v3.3.5
  * http://getbootstrap.com/javascript/#dropdowns
@@ -5093,7 +5292,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],28:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: modal.js v3.3.5
  * http://getbootstrap.com/javascript/#modals
@@ -5432,7 +5631,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],29:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: popover.js v3.3.5
  * http://getbootstrap.com/javascript/#popovers
@@ -5542,7 +5741,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],30:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: scrollspy.js v3.3.5
  * http://getbootstrap.com/javascript/#scrollspy
@@ -5716,7 +5915,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],31:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tab.js v3.3.5
  * http://getbootstrap.com/javascript/#tabs
@@ -5873,7 +6072,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tooltip.js v3.3.5
  * http://getbootstrap.com/javascript/#tooltip
@@ -6389,7 +6588,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: transition.js v3.3.5
  * http://getbootstrap.com/javascript/#transitions
@@ -6450,9 +6649,9 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],34:[function(require,module,exports){
-
 },{}],35:[function(require,module,exports){
+
+},{}],36:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -7888,7 +8087,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":36,"ieee754":37,"is-array":38}],36:[function(require,module,exports){
+},{"base64-js":37,"ieee754":38,"is-array":39}],37:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -8014,7 +8213,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],37:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -8100,7 +8299,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 
 /**
  * isArray
@@ -8135,7 +8334,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],39:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -8438,7 +8637,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],40:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -8584,7 +8783,7 @@ http.STATUS_CODES = {
     510 : 'Not Extended',               // RFC 2774
     511 : 'Network Authentication Required' // RFC 6585
 };
-},{"./lib/request":41,"events":39,"url":64}],41:[function(require,module,exports){
+},{"./lib/request":42,"events":40,"url":65}],42:[function(require,module,exports){
 var Stream = require('stream');
 var Response = require('./response');
 var Base64 = require('Base64');
@@ -8795,7 +8994,7 @@ var isXHR2Compatible = function (obj) {
     if (typeof FormData !== 'undefined' && obj instanceof FormData) return true;
 };
 
-},{"./response":42,"Base64":43,"inherits":44,"stream":62}],42:[function(require,module,exports){
+},{"./response":43,"Base64":44,"inherits":45,"stream":63}],43:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -8917,7 +9116,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":62,"util":66}],43:[function(require,module,exports){
+},{"stream":63,"util":67}],44:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -8979,7 +9178,7 @@ var isArray = Array.isArray || function (xs) {
 
 }());
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -9004,12 +9203,12 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],45:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -9101,7 +9300,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.3.2 by @mathias */
 ;(function(root) {
@@ -9635,7 +9834,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9721,7 +9920,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9808,16 +10007,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":48,"./encode":49}],51:[function(require,module,exports){
+},{"./decode":49,"./encode":50}],52:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":52}],52:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":53}],53:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -9910,7 +10109,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":54,"./_stream_writable":56,"_process":46,"core-util-is":57,"inherits":44}],53:[function(require,module,exports){
+},{"./_stream_readable":55,"./_stream_writable":57,"_process":47,"core-util-is":58,"inherits":45}],54:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9958,7 +10157,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":55,"core-util-is":57,"inherits":44}],54:[function(require,module,exports){
+},{"./_stream_transform":56,"core-util-is":58,"inherits":45}],55:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10913,7 +11112,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":52,"_process":46,"buffer":35,"core-util-is":57,"events":39,"inherits":44,"isarray":45,"stream":62,"string_decoder/":63,"util":34}],55:[function(require,module,exports){
+},{"./_stream_duplex":53,"_process":47,"buffer":36,"core-util-is":58,"events":40,"inherits":45,"isarray":46,"stream":63,"string_decoder/":64,"util":35}],56:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11124,7 +11323,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":52,"core-util-is":57,"inherits":44}],56:[function(require,module,exports){
+},{"./_stream_duplex":53,"core-util-is":58,"inherits":45}],57:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11605,7 +11804,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":52,"_process":46,"buffer":35,"core-util-is":57,"inherits":44,"stream":62}],57:[function(require,module,exports){
+},{"./_stream_duplex":53,"_process":47,"buffer":36,"core-util-is":58,"inherits":45,"stream":63}],58:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11715,10 +11914,10 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":35}],58:[function(require,module,exports){
+},{"buffer":36}],59:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":53}],59:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":54}],60:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = require('stream');
 exports.Readable = exports;
@@ -11727,13 +11926,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":52,"./lib/_stream_passthrough.js":53,"./lib/_stream_readable.js":54,"./lib/_stream_transform.js":55,"./lib/_stream_writable.js":56,"stream":62}],60:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":53,"./lib/_stream_passthrough.js":54,"./lib/_stream_readable.js":55,"./lib/_stream_transform.js":56,"./lib/_stream_writable.js":57,"stream":63}],61:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":55}],61:[function(require,module,exports){
+},{"./lib/_stream_transform.js":56}],62:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":56}],62:[function(require,module,exports){
+},{"./lib/_stream_writable.js":57}],63:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11862,7 +12061,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":39,"inherits":44,"readable-stream/duplex.js":51,"readable-stream/passthrough.js":58,"readable-stream/readable.js":59,"readable-stream/transform.js":60,"readable-stream/writable.js":61}],63:[function(require,module,exports){
+},{"events":40,"inherits":45,"readable-stream/duplex.js":52,"readable-stream/passthrough.js":59,"readable-stream/readable.js":60,"readable-stream/transform.js":61,"readable-stream/writable.js":62}],64:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12085,7 +12284,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":35}],64:[function(require,module,exports){
+},{"buffer":36}],65:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12794,14 +12993,14 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":47,"querystring":50}],65:[function(require,module,exports){
+},{"punycode":48,"querystring":51}],66:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -13391,7 +13590,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":65,"_process":46,"inherits":44}],67:[function(require,module,exports){
+},{"./support/isBuffer":66,"_process":47,"inherits":45}],68:[function(require,module,exports){
 (function() {
   exports.ACCEPT_HEADER = {
     'xml': 'application/xml',
@@ -13416,7 +13615,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, JSONStream, PESKY_COMMA, URL, URLENC, USER_AGENT, VERSION, blocking, defer, error, getMsg, http, invoke, merge, parseOptions, rejectAfter, streaming, utils, _ref;
 
@@ -13645,7 +13844,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./constants":67,"./util":79,"./version":80,"JSONStream":82,"http":40,"url":64}],69:[function(require,module,exports){
+},{"./constants":68,"./util":80,"./version":81,"JSONStream":83,"http":41,"url":65}],70:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -13945,7 +14144,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":79}],70:[function(require,module,exports){
+},{"./util":80}],71:[function(require,module,exports){
 (function() {
   var INVITES, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, get, getFolderName, intermine, invoke, isFolder, merge, set, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -14135,7 +14334,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":79}],71:[function(require,module,exports){
+},{"./util":80}],72:[function(require,module,exports){
 (function() {
   var JAVA_LANG_OBJ, Model, PathInfo, Table, error, find, flatten, intermine, omap, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -14274,7 +14473,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./path":72,"./table":77,"./util":79}],72:[function(require,module,exports){
+},{"./path":73,"./table":78,"./util":80}],73:[function(require,module,exports){
 (function() {
   var NAMES, PARSED, PathInfo, any, concatMap, copy, error, get, intermine, makeKey, set, success, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -14517,7 +14716,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":79}],73:[function(require,module,exports){
+},{"./util":80}],74:[function(require,module,exports){
 (function() {
   var Promise;
 
@@ -14527,7 +14726,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"es6-promise":87}],74:[function(require,module,exports){
+},{"es6-promise":88}],75:[function(require,module,exports){
 (function() {
   var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, stringifySortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -16352,7 +16551,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":79,"./xml":81,"backbone-events-standalone":86}],75:[function(require,module,exports){
+},{"./util":80,"./xml":82,"backbone-events-standalone":87}],76:[function(require,module,exports){
 (function() {
   var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -17374,7 +17573,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./http":68,"./id-resolution-job":69,"./lists":70,"./model":71,"./promise":73,"./query":74,"./user":78,"./util":79,"./version":80}],76:[function(require,module,exports){
+},{"./http":69,"./id-resolution-job":70,"./lists":71,"./model":72,"./promise":74,"./query":75,"./user":79,"./util":80,"./version":81}],77:[function(require,module,exports){
 (function (global){
 (function() {
   var FakeDomParser;
@@ -17391,7 +17590,7 @@ function hasOwnProperty(obj, prop) {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 (function() {
   var Promise, merge, properties,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -17469,7 +17668,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./promise":73}],78:[function(require,module,exports){
+},{"./promise":74}],79:[function(require,module,exports){
 (function() {
   var any, do_pref_req, error, get, isFunction, withCB, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -17567,7 +17766,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":79}],79:[function(require,module,exports){
+},{"./util":80}],80:[function(require,module,exports){
 (function() {
   var Promise, REQUIRES, comp, curry, encode, entities, error, flatten, fold, id, invoke, invokeWith, isArray, merge, pairFold, qsFromList, root, success, thenFold, _ref,
     __slice = [].slice,
@@ -18062,13 +18261,13 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./promise":73}],80:[function(require,module,exports){
+},{"./promise":74}],81:[function(require,module,exports){
 (function() {
   exports.VERSION = '3.14.0';
 
 }).call(this);
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 (function() {
   var DOMParser, sanitize;
 
@@ -18109,7 +18308,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"xmldom":76}],82:[function(require,module,exports){
+},{"xmldom":77}],83:[function(require,module,exports){
 (function (process,Buffer){
 
 
@@ -18306,7 +18505,7 @@ if(!module.parent && process.title !== 'browser') {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":46,"buffer":35,"jsonparse":83,"through":84}],83:[function(require,module,exports){
+},{"_process":47,"buffer":36,"jsonparse":84,"through":85}],84:[function(require,module,exports){
 (function (Buffer){
 /*global Buffer*/
 // Named constants with unique integer values
@@ -18711,7 +18910,7 @@ proto.onToken = function (token, value) {
 module.exports = Parser;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":35}],84:[function(require,module,exports){
+},{"buffer":36}],85:[function(require,module,exports){
 (function (process){
 var Stream = require('stream')
 
@@ -18823,7 +19022,7 @@ function through (write, end, opts) {
 
 
 }).call(this,require('_process'))
-},{"_process":46,"stream":62}],85:[function(require,module,exports){
+},{"_process":47,"stream":63}],86:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -19101,10 +19300,10 @@ function through (write, end, opts) {
   }
 })(this);
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 module.exports = require('./backbone-events-standalone');
 
-},{"./backbone-events-standalone":85}],87:[function(require,module,exports){
+},{"./backbone-events-standalone":86}],88:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -20080,7 +20279,7 @@ module.exports = require('./backbone-events-standalone');
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":46}],88:[function(require,module,exports){
+},{"_process":47}],89:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -29292,7 +29491,7 @@ return jQuery;
 
 }));
 
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -31344,7 +31543,7 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":46}],90:[function(require,module,exports){
+},{"_process":47}],91:[function(require,module,exports){
 /*!
  * typeahead.js 0.11.1
  * https://github.com/twitter/typeahead.js
@@ -33796,7 +33995,7 @@ return Q;
         }
     })();
 });
-},{"jquery":88}],91:[function(require,module,exports){
-arguments[4][20][0].apply(exports,arguments)
-},{"dup":20}]},{},[2])(2)
+},{"jquery":89}],92:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}]},{},[2])(2)
 });

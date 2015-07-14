@@ -1,0 +1,29 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/home/josh/.nvm/versions/node/v0.12.0/bin/node',
+1 verbose cli   '/home/josh/.nvm/versions/node/v0.12.0/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   'git@github.com:philipwalton/solved-by-flexbox.git' ]
+2 info using npm@2.5.1
+3 info using node@v0.12.0
+4 warn package.json im-querybuilder@0.0.1 No repository field.
+5 warn package.json im-querybuilder@0.0.1 No README data
+6 verbose stack Error: Unsupported URL Type: github.com:philipwalton/solved-by-flexbox.git
+6 verbose stack     at parseUrl (/home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/node_modules/npm-package-arg/npa.js:173:13)
+6 verbose stack     at npa (/home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/node_modules/npm-package-arg/npa.js:74:12)
+6 verbose stack     at resolver (/home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/lib/install.js:756:42)
+6 verbose stack     at /home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/node_modules/slide/lib/async-map.js:52:35
+6 verbose stack     at Array.forEach (native)
+6 verbose stack     at /home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/node_modules/slide/lib/async-map.js:52:11
+6 verbose stack     at Array.forEach (native)
+6 verbose stack     at asyncMap (/home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/node_modules/slide/lib/async-map.js:51:8)
+6 verbose stack     at /home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/lib/install.js:655:5
+6 verbose stack     at /home/josh/.nvm/versions/node/v0.12.0/lib/node_modules/npm/lib/install.js:324:22
+7 verbose cwd /home/josh/src/imqb
+8 error Linux 3.13.0-51-generic
+9 error argv "/home/josh/.nvm/versions/node/v0.12.0/bin/node" "/home/josh/.nvm/versions/node/v0.12.0/bin/npm" "install" "git@github.com:philipwalton/solved-by-flexbox.git"
+10 error node v0.12.0
+11 error npm  v2.5.1
+12 error Unsupported URL Type: github.com:philipwalton/solved-by-flexbox.git
+13 error If you need help, you may report this error at:
+13 error     <http://github.com/npm/npm/issues>
+14 verbose exit [ 1, true ]
