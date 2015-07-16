@@ -4,6 +4,12 @@
 @clr-highlight-bg: lighten(@clr-panel-bg, 50%);
 @clr-highlight-color: black;
 @clr-debug: hsla(42, 60%, 79%, 0.29);
+@clr-panel-bg-disabled: hsla(0, 0%, 45%, 1);
+
+@steps: 8;
+@gradbase: hsla(217, 38%, 39%, 1%);
+
+
 
 @import "../bower_components/animate.less/animate.less";
 
@@ -11,7 +17,7 @@
 
 .uiblock-container {
 
-  margin: 10px;
+  // margin: 10px;
   padding: 10px;
   display: inline-flex;
   background: @clr-panel-bg;
@@ -21,14 +27,19 @@
 
 
   .contents {
-    margin: 10px;
+    // margin: 10px;
     padding: 10px;
     flex: 1;
     background: @clr-panel-bg-lighter;
   }
 
+  .disabled {
+    background: @clr-panel-bg-disabled;
+  }
+
+
   .children {
-    margin: 10px;
+    // margin: 10px;
     padding: 10px;
     display: flex;
     flex-direction: column;

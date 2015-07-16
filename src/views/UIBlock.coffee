@@ -14,13 +14,16 @@ class UIBlock extends Backbone.View
 
   tagName: "div"
   className: "uiblock-container"
+  box: null
 
 
 
   model: UIBlockModel
 
   events:
-    "click .add": "addchild"
+    "click .add:first-of-type": "addchild"
+    "click .remove": "deleteme"
+    "click .visible": "togglevis"
 
   initialize: ->
     # @children = new Backbone.Collection
@@ -30,10 +33,31 @@ class UIBlock extends Backbone.View
   constructor: ->
     super
 
-  addchild: ->
-    newmodel = new UIBlockModel name: @model.get("name") + "..child"
+  deleteme: ->
+    @remove();
+    @unbind();
+    @model.destroy();
+
+  togglevis: (evt) ->
+    console.log "toggling vis"
+    evt.stopPropagation();
+    bg = @$el.find(".contents")
+    debugger;
+    @$el.find(".contents").toggleClass "disabled"
+
+
+
+  addchild: (evt) ->
+    evt.stopPropagation();
+    # Get the name from the input
+    name = @$el.find("input").val()
+    console.log "NAME IS", name
+
+    newmodel = new UIBlockModel name: name
     @model.addchild newmodel
-    @render()
+    view = new UIBlock model: newmodel
+    @box.append view.render()
+    # @render()
 
   renderchildren: ->
     @render()
@@ -49,20 +73,26 @@ class UIBlock extends Backbone.View
 
   render: ->
 
+    if @model.get 'name' is "Ace..child" then console.log "RENDERING SECOND"
+
 
 
     results = @template model: @model
-
     @$el.html results
+
+    addbtn = @$el.find('.add')
+    @listenTo addbtn, 'click', -> alert "test"
+
+    console.log "addtn.length", addbtn.length
+
+    console.log @$el.html()
+    @box = @$el.find(".children-entities").append childhtml
 
     childhtml = []
     mychildren = @model.get 'children'
     _.each mychildren, (nextchild) =>
-      console.log "UIBlock"
-      console.log UIBlock
       view = new UIBlock model: nextchild
       ror = view.render()
-      debugger;
       childhtml.push ror
 
     console.log "childhtml", childhtml

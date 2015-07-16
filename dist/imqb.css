@@ -10092,7 +10092,6 @@ body {
   animation-name: wobble;
 }
 .uiblock-container {
-  margin: 10px;
   padding: 10px;
   display: inline-flex;
   background: #536c97;
@@ -10115,13 +10114,14 @@ body {
   animation-name: fadeInDown;
 }
 .uiblock-container .contents {
-  margin: 10px;
   padding: 10px;
   flex: 1;
   background: #8fa2c1;
 }
+.uiblock-container .disabled {
+  background: #737373;
+}
 .uiblock-container .children {
-  margin: 10px;
   padding: 10px;
   display: flex;
   flex-direction: column;
