@@ -1,7 +1,7 @@
 
 
   <div class="contents">
-    <p>I am the <%= model.get("name") %></p>
+    <h2><%= model.get("name") %></h2>
     <div class="children-add-button">
       <span class="add label label-success">Add<span>
     </div>
@@ -9,11 +9,16 @@
       <span class="visible label label-info">Visible</span>
     </div>
     <div class="children-add-button">
+      <span class="talkup label label-info">talkup</span>
+    </div>
+    <div class="children-add-button">
       <span class="remove label label-danger">Remove</span>
     </div>
+
     <div>
       <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1">
     </div>
+
 
   </div>
 

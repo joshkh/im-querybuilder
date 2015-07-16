@@ -54,7 +54,7 @@ class MainView extends CoreView
 
 
 
-		AceModel = new UIBlockModel name: "Ace"
+		AceModel = new UIBlockModel name: "Ace", root: true
 		AceBlock = new UIBlockView model: AceModel
 		@$(".myapp").append AceBlock.render()
 

@@ -6,8 +6,6 @@ PathView = require './PathView'
 $ 				= Backbone.$
 UIBlockModel = require '../models/UIBlockModel'
 
-
-
 class UIBlock extends Backbone.View
 
   template: require '../templates/uiblock.tpl'
@@ -16,19 +14,20 @@ class UIBlock extends Backbone.View
   className: "uiblock-container"
   box: null
 
-
-
-  model: UIBlockModel
-
   events:
     "click .add:first-of-type": "addchild"
     "click .remove": "deleteme"
     "click .visible": "togglevis"
+    "click .talkup": 'talkup'
 
   initialize: ->
-    # @children = new Backbone.Collection
     @listenTo @model, 'change:query', @talk
-    # @listenTo @children, 'add', @renderchildren
+
+
+  talkup: (evt) ->
+    evt.stopPropagation()
+    console.log "talking up on", @model
+    @model.set {name: "testname"}
 
   constructor: ->
     super
@@ -39,76 +38,33 @@ class UIBlock extends Backbone.View
     @model.destroy();
 
   togglevis: (evt) ->
-    console.log "toggling vis"
     evt.stopPropagation();
     bg = @$el.find(".contents")
-    debugger;
-    @$el.find(".contents").toggleClass "disabled"
-
-
+    bg.toggleClass 'disabled'
 
   addchild: (evt) ->
     evt.stopPropagation();
-    # Get the name from the input
     name = @$el.find("input").val()
-    console.log "NAME IS", name
-
-    newmodel = new UIBlockModel name: name
-    @model.addchild newmodel
-    view = new UIBlock model: newmodel
+    view = new UIBlock model: new UIBlockModel name: name
+    @model.addchild view.model
     @box.append view.render()
-    # @render()
-
-  renderchildren: ->
-    @render()
-    # childcontainer = @$el.find(".children-entities");
-    # console.log "childcontainer is", childcontainer.length
-    # debugger;
-    # @children.each (nextmodel) ->
-    #   newview = new UIBlock model: nextmodel
-    #   res = newview.render()
-    #   console.log "res is", res
-    #   console.log "newview is", newview.renderchildren()
-    #   childcontainer.append res
 
   render: ->
 
-    if @model.get 'name' is "Ace..child" then console.log "RENDERING SECOND"
+    # Populate our element.
+    @$el.html @template model: @model
 
+    # Cache our elements for accessing later
+    @box = @$el.find(".children-entities")
 
-
-    results = @template model: @model
-    @$el.html results
-
-    addbtn = @$el.find('.add')
-    @listenTo addbtn, 'click', -> alert "test"
-
-    console.log "addtn.length", addbtn.length
-
-    console.log @$el.html()
-    @box = @$el.find(".children-entities").append childhtml
-
+    # Compute children views
     childhtml = []
-    mychildren = @model.get 'children'
-    _.each mychildren, (nextchild) =>
+    _.each @model.get 'children', (nextchild) =>
       view = new UIBlock model: nextchild
-      ror = view.render()
-      childhtml.push ror
+      childhtml.push view.render()
 
-    console.log "childhtml", childhtml
-    childcontainer = @$el.find(".children-entities").append childhtml
-
+    # Append the children
+    @box.append childhtml
     @$el
-
-
-
-
-    # console.log "children"
-
-
-
-
-
-
 
 module.exports = UIBlock

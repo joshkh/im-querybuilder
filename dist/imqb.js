@@ -105,7 +105,8 @@ module.exports={
       this.render();
       intermine = new imjs.Service(options.service);
       AceModel = new UIBlockModel({
-        name: "Ace"
+        name: "Ace",
+        root: true
       });
       AceBlock = new UIBlockView({
         model: AceModel
@@ -511,7 +512,8 @@ module.exports={
     UIBlockModel.prototype.defaults = function() {
       return {
         children: [],
-        name: "Joker"
+        name: "Joker",
+        root: false
       };
     };
 
@@ -521,16 +523,23 @@ module.exports={
 
     function UIBlockModel(opts) {
       UIBlockModel.__super__.constructor.apply(this, arguments);
-      console.log("UIBlockModel constructed.");
+      console.log("UIBlockModel constructed.", this);
     }
 
-    UIBlockModel.prototype.talk = function() {
-      return console.log("child has been updated!");
+    UIBlockModel.prototype.talk = function(evt) {
+      if (this.get('root') === true) {
+        console.log("root", this);
+        debugger;
+        console.log("message got to parent", this);
+        debugger;
+      }
     };
 
     UIBlockModel.prototype.addchild = function(child) {
+      console.log("got child", child);
       this.listenTo(child, "change", this.talk);
-      return this.get('children').push(child);
+      this.get('children').push(child);
+      return console.log("children length is now", this.get('children').length);
     };
 
     return UIBlockModel;
@@ -666,9 +675,9 @@ var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+='<div class="contents"> <p>I am the '+
+__p+='<div class="contents"> <h2>'+
 ((__t=( model.get("name") ))==null?'':__t)+
-'</p> <div class="children-add-button"> <span class="add label label-success">Add<span> </span></span></div> <div class="children-add-button"> <span class="visible label label-info">Visible</span> </div> <div class="children-add-button"> <span class="remove label label-danger">Remove</span> </div> <div> <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1"> </div> </div> <div class="children"> <div class="children-entities">  </div> </div>';
+'</h2> <div class="children-add-button"> <span class="add label label-success">Add<span> </span></span></div> <div class="children-add-button"> <span class="visible label label-info">Visible</span> </div> <div class="children-add-button"> <span class="talkup label label-info">talkup</span> </div> <div class="children-add-button"> <span class="remove label label-danger">Remove</span> </div> <div> <input type="text" class="form-control" placeholder="Username" aria-describedby="basic-addon1"> </div> </div> <div class="children"> <div class="children-entities">  </div> </div>';
 }
 return __p;
 };
@@ -919,16 +928,23 @@ return __p;
 
     UIBlock.prototype.box = null;
 
-    UIBlock.prototype.model = UIBlockModel;
-
     UIBlock.prototype.events = {
       "click .add:first-of-type": "addchild",
       "click .remove": "deleteme",
-      "click .visible": "togglevis"
+      "click .visible": "togglevis",
+      "click .talkup": 'talkup'
     };
 
     UIBlock.prototype.initialize = function() {
       return this.listenTo(this.model, 'change:query', this.talk);
+    };
+
+    UIBlock.prototype.talkup = function(evt) {
+      evt.stopPropagation();
+      console.log("talking up on", this.model);
+      return this.model.set({
+        name: "testname"
+      });
     };
 
     function UIBlock() {
@@ -943,62 +959,41 @@ return __p;
 
     UIBlock.prototype.togglevis = function(evt) {
       var bg;
-      console.log("toggling vis");
       evt.stopPropagation();
       bg = this.$el.find(".contents");
-      debugger;
-      return this.$el.find(".contents").toggleClass("disabled");
+      return bg.toggleClass('disabled');
     };
 
     UIBlock.prototype.addchild = function(evt) {
-      var name, newmodel, view;
+      var name, view;
       evt.stopPropagation();
       name = this.$el.find("input").val();
-      console.log("NAME IS", name);
-      newmodel = new UIBlockModel({
-        name: name
-      });
-      this.model.addchild(newmodel);
       view = new UIBlock({
-        model: newmodel
+        model: new UIBlockModel({
+          name: name
+        })
       });
+      this.model.addchild(view.model);
       return this.box.append(view.render());
     };
 
-    UIBlock.prototype.renderchildren = function() {
-      return this.render();
-    };
-
     UIBlock.prototype.render = function() {
-      var addbtn, childcontainer, childhtml, mychildren, results;
-      if (this.model.get('name' === "Ace..child")) {
-        console.log("RENDERING SECOND");
-      }
-      results = this.template({
+      var childhtml;
+      this.$el.html(this.template({
         model: this.model
-      });
-      this.$el.html(results);
-      addbtn = this.$el.find('.add');
-      this.listenTo(addbtn, 'click', function() {
-        return alert("test");
-      });
-      console.log("addtn.length", addbtn.length);
-      console.log(this.$el.html());
-      this.box = this.$el.find(".children-entities").append(childhtml);
+      }));
+      this.box = this.$el.find(".children-entities");
       childhtml = [];
-      mychildren = this.model.get('children');
-      _.each(mychildren, (function(_this) {
+      _.each(this.model.get('children', (function(_this) {
         return function(nextchild) {
-          var ror, view;
+          var view;
           view = new UIBlock({
             model: nextchild
           });
-          ror = view.render();
-          return childhtml.push(ror);
+          return childhtml.push(view.render());
         };
-      })(this));
-      console.log("childhtml", childhtml);
-      childcontainer = this.$el.find(".children-entities").append(childhtml);
+      })(this)));
+      this.box.append(childhtml);
       return this.$el;
     };
 

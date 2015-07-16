@@ -10114,7 +10114,6 @@ body {
   animation-name: fadeInDown;
 }
 .uiblock-container .contents {
-  padding: 10px;
   flex: 1;
   background: #8fa2c1;
 }
@@ -10122,12 +10121,10 @@ body {
   background: #737373;
 }
 .uiblock-container .children {
-  padding: 10px;
   display: flex;
   flex-direction: column;
 }
 .uiblock-container .children .children-entities {
   display: flex;
   flex-direction: column;
-  background: #f2f4f8;
 }
