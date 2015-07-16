@@ -20,9 +20,10 @@ QueryBlock				= require './views/QueryBlock'
 QuantityModel 		= require './models/QuantityModel'
 PathModel					= require './models/PathModel'
 QueryBlockModel 	= require './models/QueryBlockModel'
+UIBlockView				= require './views/UIBlock'
+UIBlockModel			= require './models/UIBlockModel'
 
 bootstrap 		= require 'bootstrap'
-console.log "bootstrap is", bootstrap
 
 
 
@@ -34,6 +35,12 @@ class MainView extends CoreView
 
 	load: (element, options) ->
 
+
+
+
+
+
+
 		# jQueryify our target element and render the shell
 		@$el = $(element)
 
@@ -43,19 +50,40 @@ class MainView extends CoreView
 		# Create our service
 		intermine = new imjs.Service options.service
 
+
+
+
+
+		AceModel = new UIBlockModel name: "Ace"
+		AceBlock = new UIBlockView model: AceModel
+		@$(".myapp").append AceBlock.render()
+
+
+		# loc.append kinguib.render()
+		# loc.append queenuib.render()
+		# loc.append queenuib2.render()
+		# loc.append aceuib.render()
+
+
+
+
 		# Fetch our model.
 		intermine.fetchModel().then (immodel) =>
 
 			# Create our first query block and pass it a model
-			qbv = new QueryBlock
-				model: new QueryBlockModel
-					root: "Gene"
-					service: intermine
-					immodel: immodel
-					parentel: @$el
+			# qbv = new QueryBlock
+			# 	model: new QueryBlockModel
+			# 		root: "Gene"
+			# 		service: intermine
+			# 		immodel: immodel
+			# 		parentel: @$el
 
 			# Render the query block
-			@queryblocksdiv.append qbv.render()
+			# @queryblocksdiv.append qbv.render()
+
+
+
+
 
 
 
@@ -96,10 +124,10 @@ class MainView extends CoreView
 
 		# Let's make a query...
 
-		intermine.query(myquery).then (aquery) =>
+		# intermine.query(myquery).then (aquery) =>
 
 			# Get a handle on our debug window:
-			
+
 			# debugwindow.html JSON.stringify myquery, null, 2
 
 			# aquery.count().then(sayCount, sayError)

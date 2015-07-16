@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "bootstrap-less": "~3.3.4",
-    "solved-by-flexbox": "https://github.com/philipwalton/solved-by-flexbox"
+    "solved-by-flexbox": "https://github.com/philipwalton/solved-by-flexbox",
+    "animate.less": "*"
   }
 }

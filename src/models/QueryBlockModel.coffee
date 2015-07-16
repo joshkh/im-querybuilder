@@ -19,6 +19,7 @@ class QueryBlockModel extends Backbone.Model
 
   initialize: ->
     @on "change:root", @setRoot, @
+    @on 'change:selected', @
 
   constructor: (opts) ->
     super
@@ -35,14 +36,6 @@ class QueryBlockModel extends Backbone.Model
         @set query: queryobj
         val = @get("query").addToSelect(["symbol"]);
 
-        # Try adding a constraint
-        constraint = {
-          "path": "Gene",
-          "op": "LOOKUP",
-          "value": "ab*",
-          "extraValue": "",
-          "code": "A"
-        }
 
         val.addConstraint constraint;
 
@@ -51,6 +44,33 @@ class QueryBlockModel extends Backbone.Model
 
         #
         @
+
+  addchildview: (queryblock) ->
+    console.log "adding child view"
+    @listenTo queryblock, change,
+
+  toggleview: (view) ->
+    selected = @get 'selected'
+    index = _.indexOf @selected, view
+
+    # If we found it them remove it
+    if index > -1
+      @set 'selected', _.without selected, view
+    else
+      selected.push view
+      @set 'selected', selected
+
+    @buildquery()
+
+  buildquery: ->
+    query = @get 'query'
+    query.views = @get 'selected';
+    @set query: query
+
+    # Needs a manual trigger since this attribute
+    # is a model.
+    @trigger "change:query"
+
 
   setRoot: ->
     console.log "setRoot", @

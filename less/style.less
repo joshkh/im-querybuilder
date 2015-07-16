@@ -6,6 +6,7 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,600);
 
 
+
 @font-family-sans-serif: 'Open Sans', sans-serif;
 
 
@@ -111,23 +112,34 @@ html, body {
 
 
 .flex-querybox-container {
-  max-width: 400px;
   display: inline-flex;
 
   flex: 0 1 auto;
-  flex-direction: column;
+  flex-direction: row;
   background-color: @clr-panel-bg;
 
   .column {
-    flex: 1 1 auto;
+    flex: 1;
+    alight-items: stretch;
+
+    .children-container {
+      display: flex;
+      flex-direction: column;
+
+      .childblock {
+        flex: 1 1 auto;
+        background-color: green;
+        margin: 5px;
+      }
+    }
 
     .flex-attribute-container {
 
        display: -webkit-flex;
        display: flex;
        -webkit-flex-direction: row;
-       flex-direction: row;
-       flex-wrap: wrap;
+       flex-direction: column;
+      //  flex-wrap: wrap;
 
        div {
          flex: 1 1 auto;
@@ -195,6 +207,8 @@ input[type=text] {
   overflow-y: scroll;
 }
 
+
+@import './uiblock';
 
 
 

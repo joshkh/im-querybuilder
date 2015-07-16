@@ -1,0 +1,46 @@
+@clr-body: hsla(0, 0%, 94%, 1);
+@clr-panel-bg: hsla(218, 29%, 46%, 1);
+@clr-panel-bg-lighter: lighten(@clr-panel-bg, 20%);
+@clr-highlight-bg: lighten(@clr-panel-bg, 50%);
+@clr-highlight-color: black;
+@clr-debug: hsla(42, 60%, 79%, 0.29);
+
+@import "../bower_components/animate.less/animate.less";
+
+@animationDurationTime: 0.1s;
+
+.uiblock-container {
+
+  margin: 10px;
+  padding: 10px;
+  display: inline-flex;
+  background: @clr-panel-bg;
+  flex-direction: row;
+  .animated;
+  .fadeInDown;
+
+
+  .contents {
+    margin: 10px;
+    padding: 10px;
+    flex: 1;
+    background: @clr-panel-bg-lighter;
+  }
+
+  .children {
+    margin: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+
+    .children-entities {
+      display: flex;
+      flex-direction: column;
+      background: @clr-highlight-bg;
+    }
+
+    .children-add-button {
+
+    }
+  }
+}

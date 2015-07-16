@@ -28,17 +28,18 @@ class QueryBlock extends Backbone.View
   constructor: ->
     super
 
+    
+
   initialize: ->
-    @model.on 'change', @talk, @
+    # @on 'change', @talk, @
+    @listenTo @model, 'change:query', @talk
 
   talk: (evt) ->
+    console.log "rendering the query..."
+    parentel = @model.get("parentel")
+    debugwindow = parentel.find(".query")
+    debugwindow.html JSON.stringify @model.get("query").toJSON(), null, 2
 
-    setTimeout =>
-      parentel = @model.get("parentel")
-      debugwindow = parentel.find(".query")
-      debugger;
-      debugwindow.html JSON.stringify @model.get("query").toJSON(), null, 2
-    , 3000
 
   runquery: ->
     @model.get("service").rows(@model.get 'query').then (value) ->
@@ -48,6 +49,14 @@ class QueryBlock extends Backbone.View
 
 
   addCollection: (evt) ->
+
+    # console.log "my el", @$el('.children-container')
+    # debugger;
+
+    # get our child children-container
+    container = @$el.find ".children-container"
+
+
     parentel = @model.get("parentel")
     @queryblocksdiv = parentel.find(".imqb.queryblocks")
 
@@ -58,21 +67,15 @@ class QueryBlock extends Backbone.View
 
 
     qbv = new QueryBlock model: newModel
-    @queryblocksdiv.append qbv.render()
+    container.append qbv.render()
 
 
 
   toggleAttribute: (evt) ->
     attribute = evt.target.dataset.attributename
-    selected = @model.get 'selected'
-    index = _.indexOf selected, attribute
+    @model.toggleview attribute
 
-    # If we found it them remove it
-    if index > -1
-      @model.set 'selected', _.without selected, attribute
-    else
-      selected.push attribute
-      @model.set 'selected', selected
+
 
     @render()
 
@@ -108,6 +111,9 @@ class QueryBlock extends Backbone.View
     # We need to update the appropriate textboxes.
     # Damn you input boxes and your lack of inner html.
     @$('.classInputText').val(root);
+
+
+
 
 
     @$el
