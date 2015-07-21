@@ -2,8 +2,11 @@
 // @import '../bower_components/Bootflat/bootflat/scss/bootflat';
 
 @import "../bower_components/bootstrap-less/less/bootstrap";
-@import "typeahead";
+// @import "typeahead";
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,600);
+@import '../bower_components/font-awesome/less/font-awesome';
+@import 'arrows';
+@import 'track-manager';
 
 
 
@@ -37,20 +40,10 @@ html, body {
 
 
 
-// .debugconsole {
-//     position: fixed;
-//     bottom: 0;
-//     width: 100%;
-//     background: #ECF0F1;
-//
-//     padding: 5px;
-//
-//     height: 50px;
-//
-// }
 
-
-
+.myapp {
+  height: 100%;
+}
 
 .debug {
     background: @clr-debug;
@@ -95,7 +88,7 @@ html, body {
 
 // Bootstrap overrides
 .dropdown-menu {
-  background-color: @clr-highlight-bg;
+  // background-color: @clr-highlight-bg;
   border-radius: 0;
   color: white;
   li {
@@ -112,11 +105,12 @@ html, body {
 
 
 .flex-querybox-container {
+  margin-left: 20px;
   display: inline-flex;
 
   flex: 0 1 auto;
   flex-direction: row;
-  background-color: @clr-panel-bg;
+  // background-color: @clr-panel-bg;
 
   .column {
     flex: 1;
@@ -137,9 +131,7 @@ html, body {
 
        display: -webkit-flex;
        display: flex;
-       -webkit-flex-direction: row;
        flex-direction: column;
-      //  flex-wrap: wrap;
 
        div {
          flex: 1 1 auto;
@@ -155,9 +147,6 @@ html, body {
          color: black;
        }
     }
-
-
-
 
   }
 
@@ -189,18 +178,19 @@ html, body {
 
 
 input[type=text] {
-	border: 0;
-	border-right: 1px solid rgba(255, 255, 255, 0.6);
-	border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-	border-left: 0px solid rgba(255, 255, 255, 0.6);
-	background: white;
-	background: transparent;
-  font-size: 28px;
-	color: white;
+	border: none;
+  font-size: 18px;
 	text-align: left;
   outline: none;
-  width: 100%;
+  // width: 80%;
+  color: white;
+  background: transparent;
+  text-align: center;
+  font-weight: 600;
 }
+
+
+
 
 .noflow {
   max-height: 300px;

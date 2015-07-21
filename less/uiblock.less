@@ -1,5 +1,5 @@
 @clr-body: hsla(0, 0%, 94%, 1);
-@clr-panel-bg: hsla(218, 29%, 46%, 1);
+@clr-panel-bg: hsla(0, 0%, 58%, 1);
 @clr-panel-bg-lighter: lighten(@clr-panel-bg, 20%);
 @clr-highlight-bg: lighten(@clr-panel-bg, 50%);
 @clr-highlight-color: black;
@@ -17,38 +17,68 @@
 
 .uiblock-container {
 
-  // margin: 10px;
-  padding: 10px;
+  margin-left: 30px;
+  margin-bottom: 30px;
   display: inline-flex;
-  background: @clr-panel-bg;
   flex-direction: row;
+  flex: 1 0 auto;
   .animated;
   .fadeInDown;
-
+  align-items: stretch;
 
   .contents {
-    // margin: 10px;
-    // padding: 10px;
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    text-align: center;
+    flex: 1 0;
     background: @clr-panel-bg-lighter;
+
+    .title {
+      font-weight: 600;
+      font-size: 2em;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+    }
   }
 
   .disabled {
     background: @clr-panel-bg-disabled;
   }
 
-
   .children {
-    // margin: 10px;
-    // padding: 10px;
     display: flex;
+    flex: 0 0 auto;
     flex-direction: column;
+    align-items: stretch;
 
     .children-entities {
       display: flex;
       flex-direction: column;
     }
 
-
   }
+
+
+}
+
+.tinylabel {
+  font-size: 10px;
+}
+
+.divider {
+  width:100%;
+  height: 1px;
+  background-color: hsla(0, 0%, 0%, 0.1);
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.dotted {
+  background: white;
+  border: 2px dashed blue;
 }

@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+  <head>
+    <script src="http://cdn.intermine.org/js/intermine/imjs/3.14.0/im.js"></script>
+  </head>
+  <body>
+
+    <script>
+
+      var mousemine   = new imjs.Service({root: 'www.mousemine.org/mousemine'});
+
+      queryjson = {"model":{"name":"genomic"},
+      "select":[
+        "Gene.primaryIdentifier",
+        "Gene.sequenceOntologyTerm.name"
+      ],
+      "orderBy":[
+        {"Gene.primaryIdentifier":"ASC"}
+      ]};
+
+      // Get each SO Term and the count of the genes that reference it.
+      mousemine.query(queryjson).then(function(imquery) {
+        imquery.summarize("Gene.sequenceOntologyTerm.name").then(function(results) {
+          console.log("reuslts", results);
+          debugger;
+        });
+      });
+
+    </script>
+
+  </body>
+</html>

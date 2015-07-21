@@ -12,6 +12,7 @@ pkg 		= require '../package.json'
 
 template = require './templates/app.tpl'
 debugtemplate = require './templates/debug.tpl'
+trackstemplate = require './templates/track-manager.tpl'
 
 CoreView 					= require './views/core-view'
 StartingPointView	= require './views/StartingPointView'
@@ -23,9 +24,16 @@ QueryBlockModel 	= require './models/QueryBlockModel'
 UIBlockView				= require './views/UIBlock'
 UIBlockModel			= require './models/UIBlockModel'
 
+CoreModel					= require './models/CoreModel'
+
 bootstrap 		= require 'bootstrap'
 
+tracks = require './tracks/index'
+console.log "tracks", tracks
 
+Service = require './utils/service'
+
+console.log "SERVICE", Service
 
 
 class MainView extends CoreView
@@ -37,10 +45,6 @@ class MainView extends CoreView
 
 
 
-
-
-
-
 		# jQueryify our target element and render the shell
 		@$el = $(element)
 
@@ -49,14 +53,38 @@ class MainView extends CoreView
 
 		# Create our service
 		intermine = new imjs.Service options.service
+		Service.set intermine
 
 
 
-
-
-		AceModel = new UIBlockModel name: "Ace", root: true
+		AceModel = new UIBlockModel name: "Gene", root: true
 		AceBlock = new UIBlockView model: AceModel
 		@$(".myapp").append AceBlock.render()
+
+
+		myquery =
+		  'from': 'Gene'
+		  'select': [
+		    'Gene.secondaryIdentifier'
+		    'Gene.symbol'
+		    'Gene.primaryIdentifier'
+		    'Gene.organism.name'
+		  ]
+		  'orderBy': [ {
+		    'path': 'secondaryIdentifier'
+		    'direction': 'ASC'
+		  } ]
+		  'where': [ {
+		    'path': 'Gene'
+		    'op': 'LOOKUP'
+		    'value': 'ab*'
+		    'extraValue': ''
+		    'code': 'A'
+		  } ]
+
+		intermine.rows(myquery).then (qresults) ->
+			console.log "query results are", qresults
+
 
 
 		# loc.append kinguib.render()
@@ -87,25 +115,6 @@ class MainView extends CoreView
 
 
 
-		myquery =
-		  'from': 'Gene'
-		  'select': [
-		    'secondaryIdentifier'
-		    'symbol'
-		    'primaryIdentifier'
-		    'organism.name'
-		  ]
-		  'orderBy': [ {
-		    'path': 'secondaryIdentifier'
-		    'direction': 'ASC'
-		  } ]
-		  'where': [ {
-		    'path': 'Gene'
-		    'op': 'LOOKUP'
-		    'value': 'ab*'
-		    'extraValue': ''
-		    'code': 'A'
-		  } ]
 
 
 		opts =
@@ -158,7 +167,16 @@ class MainView extends CoreView
 		$('body').append debugtemplate {}
 
 	render: ->
+		console.log "tracks template", trackstemplate
+		xmodel = new Backbone.Model
+		xcol = new Backbone.Collection model: xmodel
+
+		xcol.add name: 'john'
+		xcol.add name: 'sally'
+
 		@$el.html template {debug: true, version: pkg.version}
+		@$el.find('.track-manager').append trackstemplate collection: xcol
+
 
 		# Get our containers for rendering
 		@queryblocksdiv = @.$(".queryblocks")

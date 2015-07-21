@@ -6,52 +6,24 @@ PathView = require './PathView'
 $ 				= Backbone.$
 UIBlockModel = require '../models/UIBlockModel'
 
-class UIBlock extends Backbone.View
+class TrackManager extends Backbone.View
 
-  template: require '../templates/uiblock.tpl'
+  template: require '../templates/track-manager.tpl'
 
   tagName: "div"
-  className: "uiblock-container"
-  box: null
-
-  events:
-    "click .add": "addchild"
-    "click .remove": "deleteme"
-    "click .talkup": 'talkup'
-    "click .visible": "togglevis"
-    "click .query": "runQuery"
-    "focusout .lookup": "setLookup"
+  className: "track-manager"
 
   initialize: ->
     @listenTo @model, 'change:query', @talk
-    @listenTo @model, 'change:views', @render
 
-  setLookup: (evt) ->
-    @model.setLookupConstraint evt.target.value
-
-  runQuery: ->
-    @model.runQuery();
-
-  changeViews: ->
-    console.log "VIEWS HAVE BEEN CHANGED", @model.get('views')
 
   talkup: (evt) ->
-    debugger;
     evt.stopPropagation()
     console.log "talking up on", @model
     @model.set {name: "testname"}
 
   constructor: ->
     super
-
-    root = @model.get 'root'
-    if root
-      console.log "doing nothing"
-    else
-      console.log "ADDING ARROW BOX"
-      @$el.addClass 'arrow_box'
-
-
 
   deleteme: ->
     @remove();
@@ -78,7 +50,7 @@ class UIBlock extends Backbone.View
     # Populate our element.
     @$el.html @template model: @model
     # Cache our elements for accessing later
-    @box = @$el.find(".children")
+    @box = @$el.find(".children-entities")
 
     # Compute children views
     childhtml = []

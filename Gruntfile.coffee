@@ -84,7 +84,7 @@ module.exports = ->
 
 	@registerTask "build", [
 		# "clean:all", 	# Clean our build directories
-		"mochaTest"
+		# "mochaTest"
 		"copy:main", 	# Copy assets to tmp folder
 		"coffee", 		# Transcompile our coffeescript to js
 		"browserify:dist",

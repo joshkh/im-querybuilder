@@ -16,6 +16,7 @@
   "dependencies": {
     "bootstrap-less": "~3.3.4",
     "solved-by-flexbox": "https://github.com/philipwalton/solved-by-flexbox",
-    "animate.less": "*"
+    "animate.less": "*",
+    "font-awesome": "~4.3.0"
   }
 }

@@ -1,10 +1,9 @@
-Backbone  = require 'backbone'
-_         = require 'underscore'
 Q         = require 'q'
+CoreModel = require './CoreModel'
 
 {Model: {NUMERIC_TYPES, BOOLEAN_TYPES}} = require 'imjs'
 
-class PathModel extends Backbone.Model
+class PathModel extends CoreModel
 
   defaults: ->
     human: "default"

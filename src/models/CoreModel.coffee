@@ -1,9 +1,11 @@
-imjs = require 'imjs'
-
-Backbone = require 'backbone'
+Backbone 	= require 'backbone'
+imjs 			= require 'imjs'
+Service 	= require '../utils/service'
 
 class CoreModel extends Backbone.Model
 
-	test: -> "good"
+	constructor: ->
+		super
+		@set service: Service.get()
 
 module.exports = CoreModel
