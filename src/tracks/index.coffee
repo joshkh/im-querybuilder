@@ -5,11 +5,10 @@ tracks = [
   require './homologues'
 ]
 
-console.log "tracks array", tracks
-fetch = (root) ->
+get = (root) ->
   _.filter tracks, (next) ->
     next.from is root
 
 all = -> tracks
 
-module.exports = {fetch, all}
+module.exports = {get, all}

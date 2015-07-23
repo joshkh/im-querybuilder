@@ -11933,6 +11933,22 @@ body {
   font-weight: 600;
   font-size: 2em;
 }
+.uiblock-container .contents .views {
+  text-align: left;
+}
+.uiblock-container .contents .views ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+.uiblock-container .contents .views ul li {
+  padding: 10px;
+  color: black;
+}
+.uiblock-container .contents .views ul li:hover {
+  color: black;
+  background: white;
+}
 .uiblock-container .contents .toolbar {
   display: flex;
   flex-direction: row;
@@ -11950,6 +11966,46 @@ body {
 .uiblock-container .children .children-entities {
   display: flex;
   flex-direction: column;
+}
+.flash {
+  -webkit-animation-duration: 1s;
+  -moz-animation-duration: 1s;
+  -o-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-delay: 0s;
+  -moz-animation-delay: 0s;
+  -o-animation-delay: 0s;
+  animation-delay: 0s;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  -o-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation-name: wobble;
+  -moz-animation-name: wobble;
+  -o-animation-name: wobble;
+  animation-name: wobble;
+}
+.attn {
+  -webkit-animation-name: flash;
+  -moz-animation-name: flash;
+  -o-animation-name: flash;
+  animation-name: flash;
+  -webkit-animation-duration: 1s;
+  -moz-animation-duration: 1s;
+  -o-animation-duration: 1s;
+  animation-duration: 1s;
+  -webkit-animation-delay: 0s;
+  -moz-animation-delay: 0s;
+  -o-animation-delay: 0s;
+  animation-delay: 0s;
+  -webkit-animation-fill-mode: both;
+  -moz-animation-fill-mode: both;
+  -o-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation-name: wobble;
+  -moz-animation-name: wobble;
+  -o-animation-name: wobble;
+  animation-name: wobble;
 }
 .tinylabel {
   font-size: 10px;

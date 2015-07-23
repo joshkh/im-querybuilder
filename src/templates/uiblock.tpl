@@ -1,7 +1,7 @@
 
 
   <div class="contents">
-    <span class="title"><%= model.get("name") %></span>
+    <span class="title"><%= model.get("root") %></span>
 
     <div class="divider"></div>
 
@@ -14,14 +14,15 @@
       <div class="divider"></div>
 
 
-    <div>
+    <!-- <div>
       <i class="fa fa-list fa-lg"></i> Showing common fields.
-    </div>
+    </div> -->
 
-    <div>
+    <div class="views">
       <ul>
-        <% _.each(model.get('views'), function(next) { %>
-          <li><%= next.get('dn') %></li>
+        <!-- <% debugger; %> -->
+        <% model.get('selected').each(function(next) { %>
+          <li><%= _.last(next.get('parts')) %></li>
         <% }); %>
       </ul>
     </div>
@@ -33,7 +34,7 @@
 
     <div class="toolbar">
       <div class="children-add-button">
-        <span class="add label label-success">Add<span>
+        <span class="addblock label label-success">ADD BLOCK<span>
       </div>
       <div class="children-add-button">
         <span class="visible label label-info">Visible</span>

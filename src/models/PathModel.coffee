@@ -23,6 +23,7 @@ class PathModel extends CoreModel
     @set @pathAttributes path
     @setDisplayName path
     @setTypeName path
+    deferred.promise
 
   setDisplayName: (path) ->
     path.getDisplayName().then (name) =>

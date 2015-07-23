@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "backbone": "^1.2.1",
+    "backbone-model-factory": "^1.2.0",
     "bootstrap": "^3.3.5",
     "browserify": "^10.2.4",
     "chai": "^3.0.0",

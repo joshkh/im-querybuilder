@@ -16,6 +16,7 @@ module.exports={
   },
   "devDependencies": {
     "backbone": "^1.2.1",
+    "backbone-model-factory": "^1.2.0",
     "bootstrap": "^3.3.5",
     "browserify": "^10.2.4",
     "chai": "^3.0.0",
@@ -44,7 +45,7 @@ module.exports={
 
 },{}],2:[function(require,module,exports){
 (function() {
-  var $, Backbone, CoreModel, CoreView, MainView, PathModel, PathView, Q, QuantityModel, QueryBlock, QueryBlockModel, Service, StartingPointView, UIBlockModel, UIBlockView, _, bootstrap, debugtemplate, imjs, log, pkg, template, tracks, trackstemplate,
+  var $, AppView, Backbone, BlockModel, BlockView, CoreView, Q, Service, TrackModel, _, bootstrap, imjs, log, pkg,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -60,149 +61,63 @@ module.exports={
 
   Q = require('q');
 
-  console.log("$", $);
-
   pkg = require('../package.json');
-
-  template = require('./templates/app.tpl');
-
-  debugtemplate = require('./templates/debug.tpl');
-
-  trackstemplate = require('./templates/track-manager.tpl');
 
   CoreView = require('./views/core-view');
 
-  StartingPointView = require('./views/StartingPointView');
+  BlockView = require('./views/BlockView');
 
-  PathView = require('./views/PathView');
+  BlockModel = require('./models/BlockModel');
 
-  QueryBlock = require('./views/QueryBlock');
-
-  QuantityModel = require('./models/QuantityModel');
-
-  PathModel = require('./models/PathModel');
-
-  QueryBlockModel = require('./models/QueryBlockModel');
-
-  UIBlockView = require('./views/UIBlock');
-
-  UIBlockModel = require('./models/UIBlockModel');
-
-  CoreModel = require('./models/CoreModel');
-
-  bootstrap = require('bootstrap');
-
-  tracks = require('./tracks/index');
-
-  console.log("tracks", tracks);
+  TrackModel = require('./models/TrackModel');
 
   Service = require('./utils/service');
 
-  console.log("SERVICE", Service);
+  require('./shim');
 
-  MainView = (function(superClass) {
-    extend(MainView, superClass);
+  bootstrap = require('bootstrap');
 
-    function MainView() {
-      return MainView.__super__.constructor.apply(this, arguments);
+  AppView = (function(superClass) {
+    extend(AppView, superClass);
+
+    function AppView() {
+      return AppView.__super__.constructor.apply(this, arguments);
     }
 
-    MainView.prototype.initialize = function(opts) {
-      return console.log("IMQB " + pkg.version);
+    AppView.prototype.template = require('./templates/app.tpl');
+
+    AppView.prototype.initialize = function(opts) {
+      return console.debug("imqb " + pkg.version);
     };
 
-    MainView.prototype.load = function(element, options) {
-      var AceBlock, AceModel, intermine, myquery, opts, sayCount, sayError;
+    AppView.prototype.load = function(element, options) {
       this.$el = $(element);
-      this.render();
-      intermine = new imjs.Service(options.service);
-      Service.set(intermine);
-      AceModel = new UIBlockModel({
-        name: "Gene",
-        root: true
-      });
-      AceBlock = new UIBlockView({
-        model: AceModel
-      });
-      this.$(".myapp").append(AceBlock.render());
-      myquery = {
-        'from': 'Gene',
-        'select': ['Gene.secondaryIdentifier', 'Gene.symbol', 'Gene.primaryIdentifier', 'Gene.organism.name'],
-        'orderBy': [
-          {
-            'path': 'secondaryIdentifier',
-            'direction': 'ASC'
-          }
-        ],
-        'where': [
-          {
-            'path': 'Gene',
-            'op': 'LOOKUP',
-            'value': 'ab*',
-            'extraValue': '',
-            'code': 'A'
-          }
-        ]
-      };
-      intermine.rows(myquery).then(function(qresults) {
-        return console.log("query results are", qresults);
-      });
-      intermine.fetchModel().then((function(_this) {
-        return function(immodel) {};
-      })(this));
-      opts = {
-        "identifiers": ["eve", "zen", "bib"],
-        "type": "Gene",
-        "caseSensitive": true,
-        "wildCards": true,
-        "extra": "D. melanogaster"
-      };
-      sayCount = function(value) {
-        return console.log("value is", value);
-      };
-      return sayError = function(value) {
-        return console.log("error is", error);
-      };
+      Service.set(new imjs.Service(options.service));
+      return this.render();
     };
 
-    MainView.prototype.renderdebug = function() {
-      return $('body').append(debugtemplate({}));
+    AppView.prototype.render = function() {
+      var StartingView;
+      this.$el.html(this.template({}));
+      StartingView = new BlockView({
+        model: new BlockModel({
+          root: 'Gene'
+        })
+      });
+      return this.$(".imqb").append(StartingView.render());
     };
 
-    MainView.prototype.render = function() {
-      var xcol, xmodel;
-      console.log("tracks template", trackstemplate);
-      xmodel = new Backbone.Model;
-      xcol = new Backbone.Collection({
-        model: xmodel
-      });
-      xcol.add({
-        name: 'john'
-      });
-      xcol.add({
-        name: 'sally'
-      });
-      this.$el.html(template({
-        debug: true,
-        version: pkg.version
-      }));
-      this.$el.find('.track-manager').append(trackstemplate({
-        collection: xcol
-      }));
-      return this.queryblocksdiv = this.$(".queryblocks");
-    };
-
-    return MainView;
+    return AppView;
 
   })(CoreView);
 
-  module.exports = MainView;
+  module.exports = AppView;
 
 }).call(this);
 
-},{"../package.json":1,"./models/CoreModel":5,"./models/PathModel":6,"./models/QuantityModel":7,"./models/QueryBlockModel":8,"./models/UIBlockModel":9,"./templates/app.tpl":11,"./templates/debug.tpl":12,"./templates/track-manager.tpl":16,"./tracks/index":20,"./utils/log":21,"./utils/service":22,"./views/PathView":23,"./views/QueryBlock":24,"./views/StartingPointView":25,"./views/UIBlock":26,"./views/core-view":27,"backbone":28,"bootstrap":30,"imjs":84,"q":98,"underscore":100}],3:[function(require,module,exports){
+},{"../package.json":1,"./models/BlockModel":3,"./models/TrackModel":8,"./shim":9,"./templates/app.tpl":10,"./utils/log":15,"./utils/service":16,"./views/BlockView":17,"./views/core-view":19,"backbone":20,"bootstrap":22,"imjs":76,"q":90,"underscore":92}],3:[function(require,module,exports){
 (function() {
-  var AttributeCollection, Backbone, PathModel, _,
+  var AttributeCollection, Backbone, BlockCollection, BlockModel, ConstraintCollection, CoreCollection, CoreModel, PathModel, Q, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -210,7 +125,155 @@ module.exports={
 
   _ = require('underscore');
 
-  PathModel = require('../models/PathModel');
+  Q = require('q');
+
+  CoreModel = require('./CoreModel');
+
+  CoreCollection = require('./CoreCollection');
+
+  PathModel = require('./PathModel');
+
+  BlockModel = (function(superClass) {
+    extend(BlockModel, superClass);
+
+    BlockModel.prototype.defaults = {
+      query: null,
+      parent: null,
+      children: null,
+      selected: null,
+      constraints: null,
+      root: "Gene"
+    };
+
+    BlockModel.prototype.initialize = function() {
+      return this.on('change:query', this.changequery, this);
+    };
+
+    function BlockModel() {
+      BlockModel.__super__.constructor.apply(this, arguments);
+      this.set({
+        children: new BlockCollection
+      });
+      this.set({
+        selected: new AttributeCollection
+      });
+      this.set({
+        constraints: new ConstraintCollection
+      });
+      this.listenTo(this.get('children'), 'add', function(evt) {
+        return {};
+      });
+      this.listenTo(this.get('selected'), 'all', function(evt) {
+        return {};
+      });
+      if (!this.get('query')) {
+        this.get('service').query({
+          root: this.get('root')
+        }).then((function(_this) {
+          return function(query) {
+            _this.set({
+              query: query
+            });
+            return _this.addSummaryFieldsToSelect();
+          };
+        })(this));
+      } else {
+        this.get('service').query(this.get('query')).then((function(_this) {
+          return function(query) {
+            _this.set({
+              query: query
+            });
+            return _this.buildViewFromQuery();
+          };
+        })(this));
+      }
+    }
+
+    BlockModel.prototype.buildViewFromQuery = function() {
+      var arr, results;
+      this.set({
+        root: this.get('query').description
+      });
+      arr = this.get('query').views;
+      results = _.map(arr, (function(_this) {
+        return function(next) {
+          return _this.get('service').makePath(next);
+        };
+      })(this));
+      return Q.all(results).then((function(_this) {
+        return function(final) {
+          _this.get('selected').add(final);
+          return console.log("ME", _this);
+        };
+      })(this));
+    };
+
+    BlockModel.prototype.addSummaryFieldsToSelect = function() {
+      var root;
+      root = this.get('root');
+      return this.get('service').fetchSummaryFields().then((function(_this) {
+        return function(results) {
+          results = _.map(results[root], function(next) {
+            return _this.get('service').makePath(next);
+          });
+          return Q.all(results).then(function(final) {
+            return _this.get('selected').add(final);
+          });
+        };
+      })(this));
+    };
+
+    BlockModel.prototype.buildQuery = function() {
+      var query;
+      query = this.get('query');
+      this.get('children').each((function(_this) {
+        return function(next) {
+          var subviews;
+          subviews = next.get('query').views;
+          return _.each(subviews, function(subview) {
+            console.log("looking at", subview);
+            if (!query.hasView(subview)) {
+              return query.addToSelect(subview);
+            }
+          });
+        };
+      })(this));
+      this.get('selected').each(function(next) {
+        if (!query.hasView(next.id)) {
+          return query.addToSelect(next.id);
+        }
+      });
+      return console.log("query is now", query);
+    };
+
+    BlockModel.prototype.addblock = function(opts) {
+      return this.get('children').add(opts);
+    };
+
+    BlockModel.prototype.addView = function(strpath) {
+      return this.get('service').makePath(strpath).then((function(_this) {
+        return function(pi) {
+          return _this.get('selected').add(pi);
+        };
+      })(this));
+    };
+
+    return BlockModel;
+
+  })(CoreModel);
+
+  BlockCollection = (function(superClass) {
+    extend(BlockCollection, superClass);
+
+    function BlockCollection() {
+      return BlockCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    BlockCollection.prototype.model = BlockModel;
+
+    return BlockCollection;
+
+  })(CoreCollection);
 
   AttributeCollection = (function(superClass) {
     extend(AttributeCollection, superClass);
@@ -223,43 +286,53 @@ module.exports={
 
     return AttributeCollection;
 
+  })(CoreCollection);
+
+  ConstraintCollection = (function(superClass) {
+    extend(ConstraintCollection, superClass);
+
+    function ConstraintCollection() {
+      return ConstraintCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    ConstraintCollection.prototype.model = Backbone.Model;
+
+    return ConstraintCollection;
+
+  })(CoreCollection);
+
+  module.exports = BlockModel;
+
+}).call(this);
+
+},{"./CoreCollection":4,"./CoreModel":5,"./PathModel":6,"backbone":20,"q":90,"underscore":92}],4:[function(require,module,exports){
+(function() {
+  var Backbone, CoreCollection, CoreView,
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
+
+  Backbone = require('backbone');
+
+  CoreView = require('../views/CoreView');
+
+  CoreCollection = (function(superClass) {
+    extend(CoreCollection, superClass);
+
+    function CoreCollection() {
+      return CoreCollection.__super__.constructor.apply(this, arguments);
+    }
+
+    CoreCollection.prototype.model = CoreView;
+
+    return CoreCollection;
+
   })(Backbone.Collection);
 
-  module.exports = AttributeCollection;
+  module.exports = CoreCollection;
 
 }).call(this);
 
-},{"../models/PathModel":6,"backbone":28,"underscore":100}],4:[function(require,module,exports){
-(function() {
-  var $, substringMatcher, typeahead;
-
-  typeahead = require('typeahead.js');
-
-  $ = require('jquery');
-
-  substringMatcher = function(strs) {
-    return function(q, cb) {
-      var matches, substrRegex, substringRegex;
-      matches = void 0;
-      substringRegex = void 0;
-      matches = [];
-      substrRegex = new RegExp(q, 'i');
-      $.each(strs, function(i, str) {
-        if (substrRegex.test(str)) {
-          matches.push(str);
-        }
-      });
-      cb(matches);
-    };
-  };
-
-  module.exports = {
-    substringMatcher: substringMatcher
-  };
-
-}).call(this);
-
-},{"jquery":97,"typeahead.js":99}],5:[function(require,module,exports){
+},{"../views/CoreView":18,"backbone":20}],5:[function(require,module,exports){
 (function() {
   var Backbone, CoreModel, Service, imjs,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -289,7 +362,7 @@ module.exports={
 
 }).call(this);
 
-},{"../utils/service":22,"backbone":28,"imjs":84}],6:[function(require,module,exports){
+},{"../utils/service":16,"backbone":20,"imjs":76}],6:[function(require,module,exports){
 (function() {
   var BOOLEAN_TYPES, CoreModel, NUMERIC_TYPES, PathModel, Q, ref,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -327,6 +400,7 @@ module.exports={
       this.set(this.pathAttributes(path));
       this.setDisplayName(path);
       this.setTypeName(path);
+      deferred.promise;
     }
 
     PathModel.prototype.setDisplayName = function(path) {
@@ -386,42 +460,43 @@ module.exports={
 
 }).call(this);
 
-},{"./CoreModel":5,"imjs":84,"q":98}],7:[function(require,module,exports){
+},{"./CoreModel":5,"imjs":76,"q":90}],7:[function(require,module,exports){
 (function() {
-  var CoreModel, QuantityModel, imjs,
+  var Backbone, TrackCollection, TrackModel, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  CoreModel = require('./CoreModel');
+  TrackModel = require('./TrackModel');
 
-  imjs = require('imjs');
+  Backbone = require('backbone');
 
-  QuantityModel = (function(superClass) {
-    extend(QuantityModel, superClass);
+  _ = require('underscore');
 
-    function QuantityModel() {
-      return QuantityModel.__super__.constructor.apply(this, arguments);
+  TrackCollection = (function(superClass) {
+    extend(TrackCollection, superClass);
+
+    TrackCollection.prototype.model = TrackModel;
+
+    function TrackCollection() {
+      TrackCollection.__super__.constructor.apply(this, arguments);
     }
 
-    QuantityModel.prototype.defaults = {
-      quantities: ["one", "some", "all"]
+    TrackCollection.prototype.add = function(one) {
+      console.debug("TrackCollection adding:", one);
+      return TrackCollection.__super__.add.apply(this, arguments);
     };
 
-    QuantityModel.prototype.initialize = function() {
-      return console.log("QuantityModel has been inited");
-    };
+    return TrackCollection;
 
-    return QuantityModel;
+  })(Backbone.Collection);
 
-  })(CoreModel);
-
-  module.exports = QuantityModel;
+  module.exports = TrackCollection;
 
 }).call(this);
 
-},{"./CoreModel":5,"imjs":84}],8:[function(require,module,exports){
+},{"./TrackModel":8,"backbone":20,"underscore":92}],8:[function(require,module,exports){
 (function() {
-  var Backbone, Q, QueryBlockModel, _,
+  var Backbone, CoreModel, Q, TrackCollection, TrackModel, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -431,235 +506,33 @@ module.exports={
 
   Q = require('q');
 
-  QueryBlockModel = (function(superClass) {
-    extend(QueryBlockModel, superClass);
-
-    QueryBlockModel.prototype.defaults = function() {
-      return {
-        root: "Gene",
-        attributes: [],
-        collections: [],
-        immodel: null,
-        query: null,
-        service: null,
-        selected: [],
-        children: [],
-        parent: null
-      };
-    };
-
-    QueryBlockModel.prototype.initialize = function() {
-      this.on("change:root", this.setRoot, this);
-      return this.on('change:selected', this);
-    };
-
-    function QueryBlockModel(opts) {
-      QueryBlockModel.__super__.constructor.apply(this, arguments);
-      this.setRoot();
-      if (this.get("query") == null) {
-        opts = {
-          root: this.get('root')
-        };
-        this.get("service").query(opts).then((function(_this) {
-          return function(queryobj) {
-            var val;
-            _this.set({
-              query: queryobj
-            });
-            val = _this.get("query").addToSelect(["symbol"]);
-            val.addConstraint(constraint);
-            _this.set({
-              query: val
-            });
-            return _this;
-          };
-        })(this));
-      }
-    }
-
-    QueryBlockModel.prototype.addchildview = function(queryblock) {
-      console.log("adding child view");
-      return this.listenTo(queryblock, change);
-    };
-
-    QueryBlockModel.prototype.toggleview = function(view) {
-      var index, selected;
-      selected = this.get('selected');
-      index = _.indexOf(this.selected, view);
-      if (index > -1) {
-        this.set('selected', _.without(selected, view));
-      } else {
-        selected.push(view);
-        this.set('selected', selected);
-      }
-      return this.buildquery();
-    };
-
-    QueryBlockModel.prototype.buildquery = function() {
-      var query;
-      query = this.get('query');
-      query.views = this.get('selected');
-      this.set({
-        query: query
-      });
-      return this.trigger("change:query");
-    };
-
-    QueryBlockModel.prototype.setRoot = function() {
-      var attributes, collections, rootclass;
-      console.log("setRoot", this);
-      rootclass = this.get('immodel').classes[this.get('root')];
-      attributes = rootclass.attributes, collections = rootclass.collections;
-      return this.set({
-        attributes: attributes,
-        collections: collections
-      });
-    };
-
-    return QueryBlockModel;
-
-  })(Backbone.Model);
-
-  module.exports = QueryBlockModel;
-
-}).call(this);
-
-},{"backbone":28,"q":98,"underscore":100}],9:[function(require,module,exports){
-(function() {
-  var CoreModel, PathModel, Q, UIBlockModel, _,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  Q = require('q');
-
-  _ = require('underscore');
-
   CoreModel = require('./CoreModel');
 
-  PathModel = require('./PathModel');
+  TrackCollection = require('./TrackCollection');
 
-  UIBlockModel = (function(superClass) {
-    extend(UIBlockModel, superClass);
+  TrackModel = (function(superClass) {
+    extend(TrackModel, superClass);
 
-    UIBlockModel.prototype.defaults = function() {
-      var views;
-      ({
-        children: [],
-        name: "Joker",
-        root: false
-      });
-      views = [];
-      return {
-        query: null,
-        paths: []
-      };
+    TrackModel.prototype.defaults = {
+      query: null,
+      parent: null,
+      children: new TrackCollection
     };
 
-    UIBlockModel.prototype.initialize = function() {
-      return console.log("UIBlockModel initialized.");
-    };
-
-    function UIBlockModel(opts) {
-      UIBlockModel.__super__.constructor.apply(this, arguments);
-      console.log("UIBlockModel constructed.", this);
-      this.get('service').query().then((function(_this) {
-        return function(query) {
-          _this.set({
-            query: query
-          });
-          return _this.addSummaryFields();
-        };
-      })(this));
+    function TrackModel() {
+      TrackModel.__super__.constructor.apply(this, arguments);
+      console.log("TrackModel created.");
     }
 
-    UIBlockModel.prototype.runQuery = function() {
-      console.log("running query", this.get('query'));
-      this.get('query').count().then(function(count) {
-        return console.log("count is", count);
-      });
-      this.get('service').rows(this.get('query')).then(function(results) {
-        return console.log('results', results);
-      });
-      this.get('query').summarize("Gene.primaryIdentifier").then(function(summary) {
-        return console.log("primaryIdentifier total is", summary);
-      });
-      return this.get('query').summarize("Gene.symbol").then(function(summary) {
-        return console.log("symbol total is", summary);
-      });
-    };
-
-    UIBlockModel.prototype.setLookupConstraint = function(value) {
-      var constraints;
-      console.log("adding value to constraint", value);
-      constraints = this.get('query').constraints;
-      _.each(constraints, (function(_this) {
-        return function(constraint) {
-          if (constraint.op === 'LOOKUP') {
-            console.log("removing a constraint");
-            return _this.get('query').removeConstraint(constraint);
-          }
-        };
-      })(this));
-      if (!!value) {
-        return this.get('query').addConstraint({
-          path: "Gene",
-          op: "LOOKUP",
-          value: value
-        });
-      }
-    };
-
-    UIBlockModel.prototype.talk = function(evt) {
-      console.log(this.get('name') + ' is talking');
-      return this.trigger('change', this);
-    };
-
-    UIBlockModel.prototype.addchild = function(child) {
-      console.log("got child", child);
-      this.listenTo(child, "change", this.talk);
-      this.get('children').push(child);
-      return console.log("children length is now", this.get('children').length);
-    };
-
-    UIBlockModel.prototype.addPaths = function(strpaths) {
-      var promises;
-      if (strpaths == null) {
-        strpaths = [];
-      }
-      console.log('addPaths called', strpaths);
-      promises = _.map(strpaths, (function(_this) {
-        return function(n) {
-          return _this.get('service').makePath(n);
-        };
-      })(this));
-      return Q.all(promises).then((function(_this) {
-        return function(impaths) {
-          console.log("IN HERE");
-          _.each(impaths, function(impath) {
-            return _this.get('paths').push(new PathModel(impath));
-          });
-          return console.og("addPaths finished with", _this);
-        };
-      })(this));
-    };
-
-    UIBlockModel.prototype.addSummaryFields = function() {
-      return this.get('service').fetchSummaryFields().then((function(_this) {
-        return function(results) {
-          return _this.addPaths(results['Gene']);
-        };
-      })(this));
-    };
-
-    return UIBlockModel;
+    return TrackModel;
 
   })(CoreModel);
 
-  module.exports = UIBlockModel;
+  module.exports = TrackModel;
 
 }).call(this);
 
-},{"./CoreModel":5,"./PathModel":6,"q":98,"underscore":100}],10:[function(require,module,exports){
+},{"./CoreModel":5,"./TrackCollection":7,"backbone":20,"q":90,"underscore":92}],9:[function(require,module,exports){
 (function (global){
 (function() {
   var $, Backbone, jQuery, oldjq;
@@ -687,133 +560,35 @@ module.exports={
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"backbone":28,"bootstrap":30,"jquery":97,"typeahead.js":99}],11:[function(require,module,exports){
+},{"backbone":20,"bootstrap":22,"jquery":89,"typeahead.js":91}],10:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+=' <div class="myapp"> <div class="track-manager"> </div> </div>';
+__p+=' <div class="imqb"> </div>';
 }
 return __p;
 };
 
-},{"underscore":100}],12:[function(require,module,exports){
-var _ = require('underscore');
-module.exports = function(obj){
-var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
-with(obj||{}){
-__p+='<div class="debugconsole"> imqb debug console<br> imqb debug console<br> imqb debug console<br> imqb debug console<br> imqb debug console<br> imqb debug console<br> </div>';
-}
-return __p;
-};
-
-},{"underscore":100}],13:[function(require,module,exports){
-var _ = require('underscore');
-module.exports = function(obj){
-var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
-with(obj||{}){
-__p+='<div class="form-group"> <label for="sel1">Select list:</label> <select class="form-control" id="sel1"> ';
- _.each(collections, function(collection) { 
-__p+=' <option>'+
-((__t=( collection ))==null?'':__t)+
-'</option> ';
- }) 
-__p+=' </select> </div>';
-}
-return __p;
-};
-
-},{"underscore":100}],14:[function(require,module,exports){
-var _ = require('underscore');
-module.exports = function(obj){
-var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
-with(obj||{}){
-__p+='<div class="flex-querybox-container">  <div class="column">  <div class="startingpoint"> <span class="heading">Starting with a </span> <div class="btn-group btn-input"> <input type="text" class="dropdown-toggle classInputText" data-toggle="dropdown"> <ul class="dropdown-menu noflow" role="menu"> ';
- _.each(classes, function(next) { 
-__p+=' <li><a data-classname="'+
-((__t=( next.name ))==null?'':__t)+
-'" class="classname" href="#">'+
-((__t=( next.name ))==null?'':__t)+
-'</a></li> ';
- }); 
-__p+=' </ul> </div> </div>  <div class="attributes"> <span class="heading">Attributes</span> <div class="flex-attribute-container"> ';
- _.each(attributes, function(next) { 
-__p+=' ';
- var index = _.indexOf(selected, next.name); 
-__p+=' ';
- if (index > -1) { 
-__p+=' <div class="attribute toggleOn" data-attributename="'+
-((__t=( next.name ))==null?'':__t)+
-'">'+
-((__t=( next.name ))==null?'':__t)+
-'<i class="fa fa-filter"></i></div> ';
- } 
-__p+=' ';
- }); 
-__p+=' ';
- _.each(attributes, function(next) { 
-__p+=' ';
- var index = _.indexOf(selected, next.name); 
-__p+=' ';
- if (index == -1) { 
-__p+=' <div class="attribute" data-attributename="'+
-((__t=( next.name ))==null?'':__t)+
-'">'+
-((__t=( next.name ))==null?'':__t)+
-'<i class="fa fa-filter"></i></div> ';
- } 
-__p+=' ';
- }); 
-__p+=' </div> </div> </div>  <div class="column">   <div class="children-container"> </div> </div> </div> ';
-}
-return __p;
-};
-
-},{"underscore":100}],15:[function(require,module,exports){
-var _ = require('underscore');
-module.exports = function(obj){
-var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
-with(obj||{}){
-__p+='<section class="row"> Starting with a... </section>';
-}
-return __p;
-};
-
-},{"underscore":100}],16:[function(require,module,exports){
-var _ = require('underscore');
-module.exports = function(obj){
-var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
-with(obj||{}){
-__p+='<ul> ';
- collection.each(function(item) { 
-__p+=' <li>'+
-((__t=( item.get('name') ))==null?'':__t)+
-'</li> ';
- }); 
-__p+=' </ul>';
-}
-return __p;
-};
-
-},{"underscore":100}],17:[function(require,module,exports){
+},{"underscore":92}],11:[function(require,module,exports){
 var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
 __p+='<div class="contents"> <span class="title">'+
-((__t=( model.get("name") ))==null?'':__t)+
-'</span> <div class="divider"></div> <div> <input class="lookup" type="text" placeholder="Lookup" aria-describedby="basic-addon1"> </div> <div class="divider"></div> <div> <i class="fa fa-list fa-lg"></i> Showing common fields. </div> <div> <ul> ';
- _.each(model.get('views'), function(next) { 
+((__t=( model.get("root") ))==null?'':__t)+
+'</span> <div class="divider"></div> <div> <input class="lookup" type="text" placeholder="Lookup" aria-describedby="basic-addon1"> </div> <div class="divider"></div>  <div class="views"> <ul>  ';
+ model.get('selected').each(function(next) { 
 __p+=' <li>'+
-((__t=( next.get('dn') ))==null?'':__t)+
+((__t=( _.last(next.get('parts')) ))==null?'':__t)+
 '</li> ';
  }); 
-__p+=' </ul> </div> <div class="divider"></div> <div class="toolbar"> <div class="children-add-button"> <span class="add label label-success">Add<span> </span></span></div> <div class="children-add-button"> <span class="visible label label-info">Visible</span> </div> <div class="children-add-button"> <span class="talkup label label-info">talkup</span> </div> <div class="children-add-button"> <span class="remove label label-danger">Remove</span> </div> <div class="children-add-button"> <span class="query label label-danger">Query</span> </div> </div> </div> <div class="children"> <div class="children-entities">  </div> </div>';
+__p+=' </ul> </div> <div class="divider"></div> <div class="toolbar"> <div class="children-add-button"> <span class="addblock label label-success">ADD BLOCK<span> </span></span></div> <div class="children-add-button"> <span class="visible label label-info">Visible</span> </div> <div class="children-add-button"> <span class="talkup label label-info">talkup</span> </div> <div class="children-add-button"> <span class="remove label label-danger">Remove</span> </div> <div class="children-add-button"> <span class="query label label-danger">Query</span> </div> </div> </div> <div class="children"> <div class="children-entities">  </div> </div>';
 }
 return __p;
 };
 
-},{"underscore":100}],18:[function(require,module,exports){
+},{"underscore":92}],12:[function(require,module,exports){
 (function() {
   var query;
 
@@ -827,7 +602,7 @@ return __p;
 
 }).call(this);
 
-},{}],19:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function() {
   var query;
 
@@ -841,17 +616,15 @@ return __p;
 
 }).call(this);
 
-},{}],20:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 (function() {
-  var _, all, fetch, tracks;
+  var _, all, get, tracks;
 
   _ = require('underscore');
 
   tracks = [require('./go-terms'), require('./homologues')];
 
-  console.log("tracks array", tracks);
-
-  fetch = function(root) {
+  get = function(root) {
     return _.filter(tracks, function(next) {
       return next.from === root;
     });
@@ -862,13 +635,13 @@ return __p;
   };
 
   module.exports = {
-    fetch: fetch,
+    get: get,
     all: all
   };
 
 }).call(this);
 
-},{"./go-terms":18,"./homologues":19,"underscore":100}],21:[function(require,module,exports){
+},{"./go-terms":12,"./homologues":13,"underscore":92}],15:[function(require,module,exports){
 (function() {
   var context, enabled;
 
@@ -878,7 +651,7 @@ return __p;
 
 }).call(this);
 
-},{}],22:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 (function() {
   var get, globalservice, set;
 
@@ -899,347 +672,102 @@ return __p;
 
 }).call(this);
 
-},{}],23:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 (function() {
-  var Backbone, PathView, _,
+  var $, BlockView, CoreView, Tracks, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
   _ = require('underscore');
 
-  Backbone = require('backbone');
+  $ = require('jquery');
 
-  PathView = (function(superClass) {
-    extend(PathView, superClass);
+  Tracks = require('../tracks/index');
 
-    function PathView() {
-      return PathView.__super__.constructor.apply(this, arguments);
-    }
+  console.log("$", $);
 
-    PathView.prototype.template = require('../templates/pathview.tpl');
+  CoreView = require('./CoreView');
 
-    PathView.prototype.initialize = function() {
-      return console.log("PathView created", this);
-    };
+  BlockView = (function(superClass) {
+    extend(BlockView, superClass);
 
-    PathView.prototype.render = function() {
-      console.log("PathView rendering.", this);
-      this.$el.append(this.template({
-        collections: this.model.get("collections")
-      }));
-      debugger;
-    };
+    BlockView.prototype.template = require('../templates/uiblock.tpl');
 
-    return PathView;
+    BlockView.prototype.tagName = "div";
 
-  })(Backbone.View);
+    BlockView.prototype.className = "uiblock-container";
 
-  module.exports = PathView;
-
-}).call(this);
-
-},{"../templates/pathview.tpl":13,"backbone":28,"underscore":100}],24:[function(require,module,exports){
-(function() {
-  var $, AttributeCollection, Backbone, PathModel, PathView, QueryBlock, QueryBlockModel, TypeaheadSearch, _, typeahead,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  require('../shim');
-
-  _ = require('underscore');
-
-  Backbone = require('backbone');
-
-  PathView = require('./PathView');
-
-  $ = Backbone.$;
-
-  PathModel = require('../models/PathModel');
-
-  AttributeCollection = require('../collections/AttributeCollection');
-
-  TypeaheadSearch = require('../mixins/typeahead');
-
-  QueryBlockModel = require('../models/QueryBlockModel');
-
-  typeahead = require('typeahead.js');
-
-  QueryBlock = (function(superClass) {
-    extend(QueryBlock, superClass);
-
-    QueryBlock.prototype.template = require('../templates/queryblock.tpl');
-
-    QueryBlock.prototype.tagName = "div";
-
-    QueryBlock.prototype.events = {
-      "click .dropdown-menu li a": "setRoot",
-      "click .attribute": "toggleAttribute",
-      "click .addcollection": "runquery"
-    };
-
-    function QueryBlock() {
-      QueryBlock.__super__.constructor.apply(this, arguments);
-    }
-
-    QueryBlock.prototype.initialize = function() {
-      return this.listenTo(this.model, 'change:query', this.talk);
-    };
-
-    QueryBlock.prototype.talk = function(evt) {
-      var debugwindow, parentel;
-      console.log("rendering the query...");
-      parentel = this.model.get("parentel");
-      debugwindow = parentel.find(".query");
-      return debugwindow.html(JSON.stringify(this.model.get("query").toJSON(), null, 2));
-    };
-
-    QueryBlock.prototype.runquery = function() {
-      return this.model.get("service").rows(this.model.get('query')).then(function(value) {
-        return console.log("value is", value);
-      });
-    };
-
-    QueryBlock.prototype.addCollection = function(evt) {
-      var container, newModel, parentel, qbv;
-      container = this.$el.find(".children-container");
-      parentel = this.model.get("parentel");
-      this.queryblocksdiv = parentel.find(".imqb.queryblocks");
-      newModel = this.model.clone();
-      newModel.set({
-        parent: this.model
-      });
-      qbv = new QueryBlock({
-        model: newModel
-      });
-      return container.append(qbv.render());
-    };
-
-    QueryBlock.prototype.toggleAttribute = function(evt) {
-      var attribute;
-      attribute = evt.target.dataset.attributename;
-      this.model.toggleview(attribute);
-      return this.render();
-    };
-
-    QueryBlock.prototype.setRoot = function(evt) {
-      this.model.set({
-        root: evt.target.dataset.classname
-      });
-      return this.render();
-    };
-
-    QueryBlock.prototype.render = function() {
-      var attributes, classes, collections, parent, results, root, selected;
-      console.log("rendering as", this);
-      collections = this.model.get("collections");
-      attributes = this.model.get("attributes");
-      root = this.model.get("root");
-      parent = this.model.get("parent");
-      if (parent) {
-        classes = this.model.get('immodel').classes[root].collections;
-      } else {
-        classes = this.model.get('immodel').classes;
-      }
-      selected = this.model.get('selected');
-      results = this.template({
-        root: root,
-        classes: classes,
-        attributes: attributes,
-        collections: collections,
-        selected: selected
-      });
-      this.$el.html(results);
-      this.$('.classInputText').val(root);
-      return this.$el;
-    };
-
-    return QueryBlock;
-
-  })(Backbone.View);
-
-  module.exports = QueryBlock;
-
-}).call(this);
-
-},{"../collections/AttributeCollection":3,"../mixins/typeahead":4,"../models/PathModel":6,"../models/QueryBlockModel":8,"../shim":10,"../templates/queryblock.tpl":14,"./PathView":23,"backbone":28,"typeahead.js":99,"underscore":100}],25:[function(require,module,exports){
-(function() {
-  var Backbone, StartingPointView, _,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  require('../shim');
-
-  _ = require('underscore');
-
-  Backbone = require('backbone');
-
-  StartingPointView = (function(superClass) {
-    extend(StartingPointView, superClass);
-
-    function StartingPointView() {
-      return StartingPointView.__super__.constructor.apply(this, arguments);
-    }
-
-    StartingPointView.prototype.template = require('../templates/startingpoint.tpl');
-
-    StartingPointView.prototype.test = 123;
-
-    StartingPointView.prototype.talk = function() {
-      return console.log("StartingPointView is talking");
-    };
-
-    StartingPointView.prototype.render = function() {
-      debugger;
-      this.$el.append(this.template({}));
-      return console.log("I am rendering");
-    };
-
-    StartingPointView.prototype.another = function() {
-      return console.log("I am another");
-    };
-
-    return StartingPointView;
-
-  })(Backbone.View);
-
-  module.exports = StartingPointView;
-
-}).call(this);
-
-},{"../shim":10,"../templates/startingpoint.tpl":15,"backbone":28,"underscore":100}],26:[function(require,module,exports){
-(function() {
-  var $, Backbone, PathView, UIBlock, UIBlockModel, _,
-    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-    hasProp = {}.hasOwnProperty;
-
-  require('../shim');
-
-  _ = require('underscore');
-
-  Backbone = require('backbone');
-
-  PathView = require('./PathView');
-
-  $ = Backbone.$;
-
-  UIBlockModel = require('../models/UIBlockModel');
-
-  UIBlock = (function(superClass) {
-    extend(UIBlock, superClass);
-
-    UIBlock.prototype.template = require('../templates/uiblock.tpl');
-
-    UIBlock.prototype.tagName = "div";
-
-    UIBlock.prototype.className = "uiblock-container";
-
-    UIBlock.prototype.box = null;
-
-    UIBlock.prototype.events = {
-      "click .add": "addchild",
-      "click .remove": "deleteme",
-      "click .talkup": 'talkup',
-      "click .visible": "togglevis",
+    BlockView.prototype.events = {
+      "click .addblock": "addblock",
       "click .query": "runQuery",
-      "focusout .lookup": "setLookup"
+      "click .visible": "runVis",
+      "click .talkup": "buildQuery"
     };
 
-    UIBlock.prototype.initialize = function() {
-      this.listenTo(this.model, 'change:query', this.talk);
-      return this.listenTo(this.model, 'change:views', this.render);
+    BlockView.prototype.initialize = function() {
+      console.log("checking out my model", this.model);
+      return this.model.get('selected').on('change', this.render, this);
     };
 
-    UIBlock.prototype.setLookup = function(evt) {
-      return this.model.setLookupConstraint(evt.target.value);
-    };
-
-    UIBlock.prototype.runQuery = function() {
-      return this.model.runQuery();
-    };
-
-    UIBlock.prototype.changeViews = function() {
-      return console.log("VIEWS HAVE BEEN CHANGED", this.model.get('views'));
-    };
-
-    UIBlock.prototype.talkup = function(evt) {
-      debugger;
-      evt.stopPropagation();
-      console.log("talking up on", this.model);
-      return this.model.set({
-        name: "testname"
-      });
-    };
-
-    function UIBlock() {
-      var root;
-      UIBlock.__super__.constructor.apply(this, arguments);
-      root = this.model.get('root');
-      if (root) {
-        console.log("doing nothing");
-      } else {
-        console.log("ADDING ARROW BOX");
-        this.$el.addClass('arrow_box');
-      }
+    function BlockView() {
+      BlockView.__super__.constructor.apply(this, arguments);
+      this.regions = null;
     }
 
-    UIBlock.prototype.deleteme = function() {
-      this.remove();
-      this.unbind();
-      return this.model.destroy();
+    BlockView.prototype.woo = function() {
+      return console.log("AHHHHH");
     };
 
-    UIBlock.prototype.togglevis = function(evt) {
-      var bg;
-      evt.stopPropagation();
-      console.log("el is", this.$el);
-      bg = this.$el.find(".contents");
-      console.log("bg is", bg);
+    BlockView.prototype.buildQuery = function() {
+      return this.model.buildQuery();
+    };
+
+    BlockView.prototype.runVis = function() {
+      return this.model.addView("Gene.name");
+    };
+
+    BlockView.prototype.runQuery = function() {
+      var q;
+      q = this.model.get('query');
       debugger;
-      return bg.toggleClass('disabled');
-    };
-
-    UIBlock.prototype.addchild = function(evt) {
-      var name, view;
-      evt.stopPropagation();
-      name = this.$el.find("input").val();
-      view = new UIBlock({
-        model: new UIBlockModel({
-          name: name
-        })
+      return this.model.get('query').count().then(function(res) {
+        return console.log("count", res);
       });
-      this.model.addchild(view.model);
-      return this.box.append(view.render());
     };
 
-    UIBlock.prototype.render = function() {
-      var childhtml;
+    BlockView.prototype.addblock = function(evt) {
+      var bm, bv, el, t_goterms;
+      evt.stopPropagation();
+      t_goterms = Tracks.get('Gene')[0];
+      bm = this.model.addblock({
+        query: t_goterms,
+        root: "Protein"
+      });
+      bv = new BlockView({
+        model: bm
+      });
+      el = this.$el;
+      return this.regions.append(bv.render());
+    };
+
+    BlockView.prototype.render = function() {
       this.$el.html(this.template({
         model: this.model
       }));
-      this.box = this.$el.find(".children");
-      childhtml = [];
-      _.each(this.model.get('children', (function(_this) {
-        return function(nextchild) {
-          var view;
-          view = new UIBlock({
-            model: nextchild
-          });
-          return childhtml.push(view.render());
-        };
-      })(this)));
-      this.box.append(childhtml);
+      this.regions = this.$el.find('.children-entities');
+      this.$el.addClass("flash");
       return this.$el;
     };
 
-    return UIBlock;
+    return BlockView;
 
-  })(Backbone.View);
+  })(CoreView);
 
-  module.exports = UIBlock;
+  module.exports = BlockView;
 
 }).call(this);
 
-},{"../models/UIBlockModel":9,"../shim":10,"../templates/uiblock.tpl":17,"./PathView":23,"backbone":28,"underscore":100}],27:[function(require,module,exports){
+},{"../templates/uiblock.tpl":11,"../tracks/index":14,"./CoreView":18,"jquery":89,"underscore":92}],18:[function(require,module,exports){
 (function() {
   var Backbone, CoreView, _,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -1266,7 +794,9 @@ return __p;
 
 }).call(this);
 
-},{"backbone":28,"underscore":100}],28:[function(require,module,exports){
+},{"backbone":20,"underscore":92}],19:[function(require,module,exports){
+arguments[4][18][0].apply(exports,arguments)
+},{"backbone":20,"dup":18,"underscore":92}],20:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.2.1
 
@@ -3143,7 +2673,7 @@ return __p;
 }));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":97,"underscore":29}],29:[function(require,module,exports){
+},{"jquery":89,"underscore":21}],21:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -4693,7 +4223,7 @@ return __p;
   }
 }.call(this));
 
-},{}],30:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 // This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
 require('../../js/transition.js')
 require('../../js/alert.js')
@@ -4707,7 +4237,7 @@ require('../../js/popover.js')
 require('../../js/scrollspy.js')
 require('../../js/tab.js')
 require('../../js/affix.js')
-},{"../../js/affix.js":31,"../../js/alert.js":32,"../../js/button.js":33,"../../js/carousel.js":34,"../../js/collapse.js":35,"../../js/dropdown.js":36,"../../js/modal.js":37,"../../js/popover.js":38,"../../js/scrollspy.js":39,"../../js/tab.js":40,"../../js/tooltip.js":41,"../../js/transition.js":42}],31:[function(require,module,exports){
+},{"../../js/affix.js":23,"../../js/alert.js":24,"../../js/button.js":25,"../../js/carousel.js":26,"../../js/collapse.js":27,"../../js/dropdown.js":28,"../../js/modal.js":29,"../../js/popover.js":30,"../../js/scrollspy.js":31,"../../js/tab.js":32,"../../js/tooltip.js":33,"../../js/transition.js":34}],23:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: affix.js v3.3.5
  * http://getbootstrap.com/javascript/#affix
@@ -4871,7 +4401,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],32:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: alert.js v3.3.5
  * http://getbootstrap.com/javascript/#alerts
@@ -4967,7 +4497,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],33:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: button.js v3.3.5
  * http://getbootstrap.com/javascript/#buttons
@@ -5089,7 +4619,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],34:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: carousel.js v3.3.5
  * http://getbootstrap.com/javascript/#carousel
@@ -5328,7 +4858,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],35:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: collapse.js v3.3.5
  * http://getbootstrap.com/javascript/#collapse
@@ -5541,7 +5071,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],36:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: dropdown.js v3.3.5
  * http://getbootstrap.com/javascript/#dropdowns
@@ -5708,7 +5238,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],37:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: modal.js v3.3.5
  * http://getbootstrap.com/javascript/#modals
@@ -6047,7 +5577,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],38:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: popover.js v3.3.5
  * http://getbootstrap.com/javascript/#popovers
@@ -6157,7 +5687,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],39:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: scrollspy.js v3.3.5
  * http://getbootstrap.com/javascript/#scrollspy
@@ -6331,7 +5861,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],40:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tab.js v3.3.5
  * http://getbootstrap.com/javascript/#tabs
@@ -6488,7 +6018,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],41:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tooltip.js v3.3.5
  * http://getbootstrap.com/javascript/#tooltip
@@ -7004,7 +6534,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],42:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: transition.js v3.3.5
  * http://getbootstrap.com/javascript/#transitions
@@ -7065,9 +6595,9 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],43:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 
-},{}],44:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -8503,7 +8033,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-},{"base64-js":45,"ieee754":46,"is-array":47}],45:[function(require,module,exports){
+},{"base64-js":37,"ieee754":38,"is-array":39}],37:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -8629,7 +8159,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],46:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -8715,7 +8245,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],47:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 
 /**
  * isArray
@@ -8750,7 +8280,7 @@ module.exports = isArray || function (val) {
   return !! val && '[object Array]' == str.call(val);
 };
 
-},{}],48:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -9053,7 +8583,7 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],49:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var http = module.exports;
 var EventEmitter = require('events').EventEmitter;
 var Request = require('./lib/request');
@@ -9199,7 +8729,7 @@ http.STATUS_CODES = {
     510 : 'Not Extended',               // RFC 2774
     511 : 'Network Authentication Required' // RFC 6585
 };
-},{"./lib/request":50,"events":48,"url":73}],50:[function(require,module,exports){
+},{"./lib/request":42,"events":40,"url":65}],42:[function(require,module,exports){
 var Stream = require('stream');
 var Response = require('./response');
 var Base64 = require('Base64');
@@ -9410,7 +8940,7 @@ var isXHR2Compatible = function (obj) {
     if (typeof FormData !== 'undefined' && obj instanceof FormData) return true;
 };
 
-},{"./response":51,"Base64":52,"inherits":53,"stream":71}],51:[function(require,module,exports){
+},{"./response":43,"Base64":44,"inherits":45,"stream":63}],43:[function(require,module,exports){
 var Stream = require('stream');
 var util = require('util');
 
@@ -9532,7 +9062,7 @@ var isArray = Array.isArray || function (xs) {
     return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{"stream":71,"util":75}],52:[function(require,module,exports){
+},{"stream":63,"util":67}],44:[function(require,module,exports){
 ;(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
@@ -9594,7 +9124,7 @@ var isArray = Array.isArray || function (xs) {
 
 }());
 
-},{}],53:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -9619,12 +9149,12 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],54:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],55:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -9716,7 +9246,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],56:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/punycode v1.3.2 by @mathias */
 ;(function(root) {
@@ -10250,7 +9780,7 @@ process.umask = function() { return 0; };
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],57:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10336,7 +9866,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],58:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10423,16 +9953,16 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],59:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":57,"./encode":58}],60:[function(require,module,exports){
+},{"./decode":49,"./encode":50}],52:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":61}],61:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":53}],53:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -10525,7 +10055,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":63,"./_stream_writable":65,"_process":55,"core-util-is":66,"inherits":53}],62:[function(require,module,exports){
+},{"./_stream_readable":55,"./_stream_writable":57,"_process":47,"core-util-is":58,"inherits":45}],54:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -10573,7 +10103,7 @@ PassThrough.prototype._transform = function(chunk, encoding, cb) {
   cb(null, chunk);
 };
 
-},{"./_stream_transform":64,"core-util-is":66,"inherits":53}],63:[function(require,module,exports){
+},{"./_stream_transform":56,"core-util-is":58,"inherits":45}],55:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -11528,7 +11058,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":61,"_process":55,"buffer":44,"core-util-is":66,"events":48,"inherits":53,"isarray":54,"stream":71,"string_decoder/":72,"util":43}],64:[function(require,module,exports){
+},{"./_stream_duplex":53,"_process":47,"buffer":36,"core-util-is":58,"events":40,"inherits":45,"isarray":46,"stream":63,"string_decoder/":64,"util":35}],56:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -11739,7 +11269,7 @@ function done(stream, er) {
   return stream.push(null);
 }
 
-},{"./_stream_duplex":61,"core-util-is":66,"inherits":53}],65:[function(require,module,exports){
+},{"./_stream_duplex":53,"core-util-is":58,"inherits":45}],57:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12220,7 +11750,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":61,"_process":55,"buffer":44,"core-util-is":66,"inherits":53,"stream":71}],66:[function(require,module,exports){
+},{"./_stream_duplex":53,"_process":47,"buffer":36,"core-util-is":58,"inherits":45,"stream":63}],58:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -12330,10 +11860,10 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":44}],67:[function(require,module,exports){
+},{"buffer":36}],59:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":62}],68:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":54}],60:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Stream = require('stream');
 exports.Readable = exports;
@@ -12342,13 +11872,13 @@ exports.Duplex = require('./lib/_stream_duplex.js');
 exports.Transform = require('./lib/_stream_transform.js');
 exports.PassThrough = require('./lib/_stream_passthrough.js');
 
-},{"./lib/_stream_duplex.js":61,"./lib/_stream_passthrough.js":62,"./lib/_stream_readable.js":63,"./lib/_stream_transform.js":64,"./lib/_stream_writable.js":65,"stream":71}],69:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":53,"./lib/_stream_passthrough.js":54,"./lib/_stream_readable.js":55,"./lib/_stream_transform.js":56,"./lib/_stream_writable.js":57,"stream":63}],61:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
-},{"./lib/_stream_transform.js":64}],70:[function(require,module,exports){
+},{"./lib/_stream_transform.js":56}],62:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":65}],71:[function(require,module,exports){
+},{"./lib/_stream_writable.js":57}],63:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12477,7 +12007,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":48,"inherits":53,"readable-stream/duplex.js":60,"readable-stream/passthrough.js":67,"readable-stream/readable.js":68,"readable-stream/transform.js":69,"readable-stream/writable.js":70}],72:[function(require,module,exports){
+},{"events":40,"inherits":45,"readable-stream/duplex.js":52,"readable-stream/passthrough.js":59,"readable-stream/readable.js":60,"readable-stream/transform.js":61,"readable-stream/writable.js":62}],64:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -12700,7 +12230,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":44}],73:[function(require,module,exports){
+},{"buffer":36}],65:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -13409,14 +12939,14 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":56,"querystring":59}],74:[function(require,module,exports){
+},{"punycode":48,"querystring":51}],66:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],75:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -14006,7 +13536,7 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":74,"_process":55,"inherits":53}],76:[function(require,module,exports){
+},{"./support/isBuffer":66,"_process":47,"inherits":45}],68:[function(require,module,exports){
 (function() {
   exports.ACCEPT_HEADER = {
     'xml': 'application/xml',
@@ -14031,7 +13561,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{}],77:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 (function() {
   var ACCEPT_HEADER, JSONStream, PESKY_COMMA, URL, URLENC, USER_AGENT, VERSION, blocking, defer, error, getMsg, http, invoke, merge, parseOptions, rejectAfter, streaming, utils, _ref;
 
@@ -14260,7 +13790,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./constants":76,"./util":88,"./version":89,"JSONStream":91,"http":49,"url":73}],78:[function(require,module,exports){
+},{"./constants":68,"./util":80,"./version":81,"JSONStream":83,"http":41,"url":65}],70:[function(require,module,exports){
 (function() {
   var CategoryResults, IDResolutionJob, IdResults, ONE_MINUTE, concatMap, defer, difference, fold, funcutils, get, id, intermine, uniqBy, withCB,
     __hasProp = {}.hasOwnProperty,
@@ -14560,7 +14090,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":88}],79:[function(require,module,exports){
+},{"./util":80}],71:[function(require,module,exports){
 (function() {
   var INVITES, List, REQUIRES_VERSION, SHARES, TAGS_PATH, dejoin, get, getFolderName, intermine, invoke, isFolder, merge, set, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -14750,7 +14280,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":88}],80:[function(require,module,exports){
+},{"./util":80}],72:[function(require,module,exports){
 (function() {
   var JAVA_LANG_OBJ, Model, PathInfo, Table, error, find, flatten, intermine, omap, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -14889,7 +14419,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./path":81,"./table":86,"./util":88}],81:[function(require,module,exports){
+},{"./path":73,"./table":78,"./util":80}],73:[function(require,module,exports){
 (function() {
   var NAMES, PARSED, PathInfo, any, concatMap, copy, error, get, intermine, makeKey, set, success, utils, withCB,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -15132,7 +14662,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":88}],82:[function(require,module,exports){
+},{"./util":80}],74:[function(require,module,exports){
 (function() {
   var Promise;
 
@@ -15142,7 +14672,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"es6-promise":96}],83:[function(require,module,exports){
+},{"es6-promise":88}],75:[function(require,module,exports){
 (function() {
   var BASIC_ATTRS, CODES, Events, LIST_PIPE, Query, REQUIRES_VERSION, RESULTS_METHODS, SIMPLE_ATTRS, bioUriArgs, conAttrs, conStr, conToJSON, conValStr, concatMap, copyCon, decapitate, didntRemove, f, filter, fold, get, get_canonical_op, headLess, id, idConStr, intermine, interpretConArray, interpretConstraint, invoke, merge, mth, multiConStr, noUndefVals, noValueConStr, partition, removeIrrelevantSortOrders, simpleConStr, stringToSortOrder, stringifySortOrder, toQueryString, typeConStr, union, utils, withCB, _fn, _get_data_fetcher, _i, _j, _len, _len1, _ref,
     __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -16967,7 +16497,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":88,"./xml":90,"backbone-events-standalone":95}],84:[function(require,module,exports){
+},{"./util":80,"./xml":82,"backbone-events-standalone":87}],76:[function(require,module,exports){
 (function() {
   var ALWAYS_AUTH, CLASSKEYS, CLASSKEY_PATH, DEFAULT_ERROR_HANDLER, DEFAULT_PROTOCOL, ENRICHMENT_PATH, HAS_PROTOCOL, HAS_SUFFIX, IDResolutionJob, ID_RESOLUTION_PATH, LISTS_PATH, LIST_OPERATION_PATHS, LIST_PIPE, List, MODELS, MODEL_PATH, Model, NEEDS_AUTH, NO_AUTH, PATH_VALUES_PATH, PREF_PATH, Promise, QUERY_RESULTS_PATH, QUICKSEARCH_PATH, Query, RELEASES, RELEASE_PATH, REQUIRES_VERSION, SUBTRACT_PATH, SUFFIX, SUMMARYFIELDS_PATH, SUMMARY_FIELDS, Service, TABLE_ROW_PATH, TEMPLATES_PATH, TO_NAMES, USER_TOKENS, User, VERSIONS, VERSION_PATH, WHOAMI_PATH, WIDGETS, WIDGETS_PATH, WITH_OBJ_PATH, dejoin, error, get, getListFinder, http, invoke, map, merge, p, set, success, to_query_string, utils, version, withCB, _get_or_fetch, _i, _j, _len, _len1, _ref, _ref1,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -17989,7 +17519,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./http":77,"./id-resolution-job":78,"./lists":79,"./model":80,"./promise":82,"./query":83,"./user":87,"./util":88,"./version":89}],85:[function(require,module,exports){
+},{"./http":69,"./id-resolution-job":70,"./lists":71,"./model":72,"./promise":74,"./query":75,"./user":79,"./util":80,"./version":81}],77:[function(require,module,exports){
 (function (global){
 (function() {
   var FakeDomParser;
@@ -18006,7 +17536,7 @@ function hasOwnProperty(obj, prop) {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],86:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 (function() {
   var Promise, merge, properties,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -18084,7 +17614,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./promise":82}],87:[function(require,module,exports){
+},{"./promise":74}],79:[function(require,module,exports){
 (function() {
   var any, do_pref_req, error, get, isFunction, withCB, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
@@ -18182,7 +17712,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./util":88}],88:[function(require,module,exports){
+},{"./util":80}],80:[function(require,module,exports){
 (function() {
   var Promise, REQUIRES, comp, curry, encode, entities, error, flatten, fold, id, invoke, invokeWith, isArray, merge, pairFold, qsFromList, root, success, thenFold, _ref,
     __slice = [].slice,
@@ -18677,13 +18207,13 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"./promise":82}],89:[function(require,module,exports){
+},{"./promise":74}],81:[function(require,module,exports){
 (function() {
   exports.VERSION = '3.14.0';
 
 }).call(this);
 
-},{}],90:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 (function() {
   var DOMParser, sanitize;
 
@@ -18724,7 +18254,7 @@ function hasOwnProperty(obj, prop) {
 
 }).call(this);
 
-},{"xmldom":85}],91:[function(require,module,exports){
+},{"xmldom":77}],83:[function(require,module,exports){
 (function (process,Buffer){
 
 
@@ -18921,7 +18451,7 @@ if(!module.parent && process.title !== 'browser') {
 }
 
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":55,"buffer":44,"jsonparse":92,"through":93}],92:[function(require,module,exports){
+},{"_process":47,"buffer":36,"jsonparse":84,"through":85}],84:[function(require,module,exports){
 (function (Buffer){
 /*global Buffer*/
 // Named constants with unique integer values
@@ -19326,7 +18856,7 @@ proto.onToken = function (token, value) {
 module.exports = Parser;
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":44}],93:[function(require,module,exports){
+},{"buffer":36}],85:[function(require,module,exports){
 (function (process){
 var Stream = require('stream')
 
@@ -19438,7 +18968,7 @@ function through (write, end, opts) {
 
 
 }).call(this,require('_process'))
-},{"_process":55,"stream":71}],94:[function(require,module,exports){
+},{"_process":47,"stream":63}],86:[function(require,module,exports){
 /**
  * Standalone extraction of Backbone.Events, no external dependency required.
  * Degrades nicely when Backone/underscore are already available in the current
@@ -19716,10 +19246,10 @@ function through (write, end, opts) {
   }
 })(this);
 
-},{}],95:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 module.exports = require('./backbone-events-standalone');
 
-},{"./backbone-events-standalone":94}],96:[function(require,module,exports){
+},{"./backbone-events-standalone":86}],88:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -20695,7 +20225,7 @@ module.exports = require('./backbone-events-standalone');
 
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":55}],97:[function(require,module,exports){
+},{"_process":47}],89:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.4
  * http://jquery.com/
@@ -29907,7 +29437,7 @@ return jQuery;
 
 }));
 
-},{}],98:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 (function (process){
 // vim:ts=4:sts=4:sw=4:
 /*!
@@ -31959,7 +31489,7 @@ return Q;
 });
 
 }).call(this,require('_process'))
-},{"_process":55}],99:[function(require,module,exports){
+},{"_process":47}],91:[function(require,module,exports){
 /*!
  * typeahead.js 0.11.1
  * https://github.com/twitter/typeahead.js
@@ -34411,7 +33941,7 @@ return Q;
         }
     })();
 });
-},{"jquery":97}],100:[function(require,module,exports){
-arguments[4][29][0].apply(exports,arguments)
-},{"dup":29}]},{},[2])(2)
+},{"jquery":89}],92:[function(require,module,exports){
+arguments[4][21][0].apply(exports,arguments)
+},{"dup":21}]},{},[2])(2)
 });

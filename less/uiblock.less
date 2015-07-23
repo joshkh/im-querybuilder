@@ -39,6 +39,26 @@
       font-size: 2em;
     }
 
+    .views {
+      text-align: left;
+      ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+
+        li {
+          padding: 10px;
+          color: black;
+        }
+
+        li:hover {
+          color: black;
+          background: white;
+        }
+      }
+
+    }
+
     .toolbar {
       display: flex;
       flex-direction: row;
@@ -64,6 +84,16 @@
   }
 
 
+}
+
+.flash {
+  .animated;
+  .wobble;
+}
+
+.attn {
+  .animated;
+  .flash;
 }
 
 .tinylabel {
