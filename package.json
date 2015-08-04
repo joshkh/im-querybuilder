@@ -13,6 +13,15 @@
     "jquery": "^2.1.4",
     "typeahead.js": "^0.11.1"
   },
+  "browserify": {
+      "transform": ["browserify-shim"]
+  },
+  "browser": {
+       "jQuery.transit": "./bower_components/jquery.transit/jquery/transit.js"
+  },
+  "browserify-shim": {
+      "jQuery": "global:jQuery"
+  },
   "devDependencies": {
     "backbone": "^1.2.1",
     "backbone-model-factory": "^1.2.0",
@@ -35,6 +44,7 @@
     "grunt-notify": "^0.4.1",
     "imjs": "^3.14.0",
     "jquery": "^2.1.4",
+    "jquery-ui": "^1.10.5",
     "jstify": "^0.11.0",
     "mocha": "^2.2.5",
     "q": "^1.4.1",

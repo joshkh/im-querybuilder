@@ -5,8 +5,10 @@
 // @import "typeahead";
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400,600);
 @import '../bower_components/font-awesome/less/font-awesome';
-@import 'arrows';
-@import 'track-manager';
+// @import 'arrows';
+// @import 'track-manager';
+// @import 'stats';
+// @import './sidebar';
 
 
 
@@ -40,166 +42,165 @@ html, body {
 
 
 
+// 
+// .myapp {
+//   height: 100%;
+// }
+//
+// .debug {
+//     background: @clr-debug;
+//     .query {
+//       color: white;
+//       padding: 10px;
+//       font-family: "Courier New", monospace;
+//       overflow-y: auto;
+//       border: none;
+//       background-color: transparent;
+//       font-size: 9px;
+//   }
+// }
+//
+//
+// .flex-container {
+//     height: 100%;
+//     display: flex;
+//     flex-direction: row;
+//     flex-wrap: nowrap;
+//     justify-content: flex-start;
+//     align-content: stretch;
+//     align-items: stretch;
+//
+//     .flex-column {
+//         order: 0;
+//         flex: 1 1 auto;
+//         align-self: auto;
+//         }
+//
+//     .flex-column-fixed {
+//         width: 300px;
+//         order: 0;
+//         flex: 0 1 auto;
+//         align-self: auto;
+//       }
+//
+// }
+//
+//
+//
+//
+// // Bootstrap overrides
+// .dropdown-menu {
+//   // background-color: @clr-highlight-bg;
+//   border-radius: 0;
+//   color: white;
+//   li {
+//     a {color: white;}
+//     font-size: 18px;
+//   }
+// }
+//
+// // Bootstrap overrides:
+// .row {
+//   margin: 0;
+// }
+//
+//
+//
+// .flex-querybox-container {
+//   margin-left: 20px;
+//   display: inline-flex;
+//
+//   flex: 0 1 auto;
+//   flex-direction: row;
+//   // background-color: @clr-panel-bg;
+//
+//   .column {
+//     flex: 1;
+//     alight-items: stretch;
+//
+//     .children-container {
+//       display: flex;
+//       flex-direction: column;
+//
+//       .childblock {
+//         flex: 1 1 auto;
+//         background-color: green;
+//         margin: 5px;
+//       }
+//     }
+//
+//     .flex-attribute-container {
+//
+//        display: -webkit-flex;
+//        display: flex;
+//        flex-direction: column;
+//
+//        div {
+//          flex: 1 1 auto;
+//          background-color: @clr-panel-bg-lighter;
+//          color: white;
+//          padding: 3px;
+//          margin: 3px;
+//          text-align: center;
+//        }
+//
+//        div.toggleOn {
+//          background-color: white;
+//          color: black;
+//        }
+//     }
+//
+//   }
+//
+//   .toolbox {
+//     flex: 1 1 auto;
+//     .flex-tool-container {
+//       display: flex;
+//       justify-content: flex-end;
+//       flex-direction: row;
+//       div {
+//         display: flex;
+//         align-items: center;
+//         justify-content: center;
+//         width: 50px;
+//         height: 50px;
+//         background-color: @clr-panel-bg-lighter;
+//         color: white;
+//       }
+//     }
+//   }
+//
+// }
+//
+//
+// .queryblocks:not:first-child {
+//   margin-top: 50px;
+// }
+//
+//
+//
+// input[type=text] {
+// 	border: none;
+//   font-size: 18px;
+// 	text-align: left;
+//   outline: none;
+//   // width: 80%;
+//   color: white;
+//   background: transparent;
+//   text-align: center;
+//   font-weight: 600;
+// }
+//
+//
+//
+//
+// .noflow {
+//   max-height: 300px;
+//   overflow-y: scroll;
+// }
 
-.myapp {
-  height: 100%;
-}
 
-.debug {
-    background: @clr-debug;
-    .query {
-      color: white;
-      padding: 10px;
-      font-family: "Courier New", monospace;
-      overflow-y: auto;
-      border: none;
-      background-color: transparent;
-      font-size: 9px;
-  }
-}
-
-
-.flex-container {
-    height: 100%;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-content: stretch;
-    align-items: stretch;
-
-    .flex-column {
-        order: 0;
-        flex: 1 1 auto;
-        align-self: auto;
-        }
-
-    .flex-column-fixed {
-        width: 300px;
-        order: 0;
-        flex: 0 1 auto;
-        align-self: auto;
-      }
-
-}
-
-
-
-
-// Bootstrap overrides
-.dropdown-menu {
-  // background-color: @clr-highlight-bg;
-  border-radius: 0;
-  color: white;
-  li {
-    a {color: white;}
-    font-size: 18px;
-  }
-}
-
-// Bootstrap overrides:
-.row {
-  margin: 0;
-}
-
-
-
-.flex-querybox-container {
-  margin-left: 20px;
-  display: inline-flex;
-
-  flex: 0 1 auto;
-  flex-direction: row;
-  // background-color: @clr-panel-bg;
-
-  .column {
-    flex: 1;
-    alight-items: stretch;
-
-    .children-container {
-      display: flex;
-      flex-direction: column;
-
-      .childblock {
-        flex: 1 1 auto;
-        background-color: green;
-        margin: 5px;
-      }
-    }
-
-    .flex-attribute-container {
-
-       display: -webkit-flex;
-       display: flex;
-       flex-direction: column;
-
-       div {
-         flex: 1 1 auto;
-         background-color: @clr-panel-bg-lighter;
-         color: white;
-         padding: 3px;
-         margin: 3px;
-         text-align: center;
-       }
-
-       div.toggleOn {
-         background-color: white;
-         color: black;
-       }
-    }
-
-  }
-
-  .toolbox {
-    flex: 1 1 auto;
-    .flex-tool-container {
-      display: flex;
-      justify-content: flex-end;
-      flex-direction: row;
-      div {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 50px;
-        height: 50px;
-        background-color: @clr-panel-bg-lighter;
-        color: white;
-      }
-    }
-  }
-
-}
-
-
-.queryblocks:not:first-child {
-  margin-top: 50px;
-}
-
-
-
-input[type=text] {
-	border: none;
-  font-size: 18px;
-	text-align: left;
-  outline: none;
-  // width: 80%;
-  color: white;
-  background: transparent;
-  text-align: center;
-  font-weight: 600;
-}
-
-
-
-
-.noflow {
-  max-height: 300px;
-  overflow-y: scroll;
-}
-
-
-@import './uiblock';
-
+@import './app';
 
 
 //////////////////////////////////

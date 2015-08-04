@@ -16,6 +16,9 @@ class PathModel extends CoreModel
     isBoolean: false
     isReference: false # Assumes attribute by default
     isAttribute: true
+    active: Q.defer()
+
+  settled: -> @get('active').promise
 
   constructor: (path) ->
     deferred = Q.defer()
@@ -30,6 +33,7 @@ class PathModel extends CoreModel
       split = name.split ' > '
       @set displayName: name, parts: split
       @set human: split[split.length - 1]
+      @get('active').resolve @
 
   setTypeName: (path) ->
     type = (if path.isAttribute() then path.getParent() else path).getType()

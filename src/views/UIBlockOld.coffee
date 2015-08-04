@@ -32,9 +32,22 @@ class UIBlock extends Backbone.View
   speak: (evt) ->
     @render()
 
+  setLookupConstraint: (value) ->
 
-  setLookup: (evt) ->
-    @model.setLookupConstraint evt.target.value
+    console.log "adding value to constraint", value
+
+    constraints = @get('query').constraints
+    _.each constraints, (constraint) =>
+      if constraint.op is 'LOOKUP'
+        console.log "removing a constraint"
+        @get('query').removeConstraint constraint
+
+    if !!value then @get('query').addConstraint
+        path: "Gene"
+        op: "LOOKUP"
+        value: value
+
+    console.log "query is now", query
 
   runQuery: ->
     @model.runQuery();

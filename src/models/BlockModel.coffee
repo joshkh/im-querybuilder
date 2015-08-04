@@ -15,6 +15,7 @@ class BlockModel extends CoreModel
     selected: null
     constraints: null
     root: "Gene"
+    pathinfo: null
 
   initialize: ->
     @on 'change:query', @changequery, @
@@ -28,8 +29,10 @@ class BlockModel extends CoreModel
     @set selected: new AttributeCollection
     @set constraints: new ConstraintCollection
 
+    @get('service').makePath(@get('root')).then (path) => @set pathinfo: path
+
     @listenTo @get('children'), 'add', (evt) -> {}
-    @listenTo @get('selected'), 'all', (evt) -> {}
+    @listenTo @get('selected'), 'all', (evt) -> @trigger "changed:selected"
 
     if !@get('query')
       @get('service').query(root: @get('root')).then (query) =>
@@ -39,6 +42,11 @@ class BlockModel extends CoreModel
       @get('service').query(@get('query')).then (query) =>
         @set query: query
         @buildViewFromQuery()
+
+  getCollections: ->
+    _.filter @get('pathinfo').getChildNodes(), (next) ->
+      next.isCollection() is true
+
 
   buildViewFromQuery: ->
     @set root: @get('query').description
@@ -73,7 +81,22 @@ class BlockModel extends CoreModel
 
     console.log "query is now", query
 
+  setLookupConstraint: (value) ->
 
+    console.log "adding value to constraint1", value
+
+    constraints = @get('query').constraints
+    _.each constraints, (constraint) =>
+      if constraint.op is 'LOOKUP'
+        console.log "removing a constraint"
+        @get('query').removeConstraint constraint
+
+    if !!value then @get('query').addConstraint
+        path: "Gene"
+        op: "LOOKUP"
+        value: value
+
+    console.log "query is now", @get('query')
 
   addblock: (opts) ->
     @get('children').add opts

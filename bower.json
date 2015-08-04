@@ -18,5 +18,8 @@
     "solved-by-flexbox": "https://github.com/philipwalton/solved-by-flexbox",
     "animate.less": "*",
     "font-awesome": "~4.3.0"
+  },
+  "devDependencies": {
+    "jquery.transit": "~0.9.12"
   }
 }

@@ -1,12 +1,13 @@
 # Packages
-_ 								= require 'underscore'
+# _ 								= require 'underscore'
 Backbone 					= require 'backbone'
+$ = require 'jquery'
 log 							= require './utils/log'
 $ 								= Backbone.$
 imjs 							= require 'imjs'
 Q 								= require 'q'
 pkg 							= require '../package.json'
-
+#
 # Backbone
 CoreView 					= require './views/core-view'
 BlockView				= require './views/BlockView'
@@ -19,14 +20,19 @@ Service 					= require './utils/service'
 
 require './shim'
 
+global.jQuery = require("jquery")
+
+
 # Styles
 bootstrap 				= require 'bootstrap'
 
-class AppView extends CoreView
+class AppView extends Backbone.View
 	template: require './templates/app.tpl'
+	# statstemplate = require './templates/stats.tpl'
 
 	initialize: (opts) ->
-		console.debug "imqb #{pkg.version}"
+		console.log "init"
+		# console.debug "imqb #{pkg.version}"
 
 	load: (element, options) ->
 		@$el = $ element
@@ -34,10 +40,13 @@ class AppView extends CoreView
 		@render()
 
 	render: ->
+		console.log "rendering"
 		@$el.html @template {}
 		StartingView = new BlockView
 			model: new BlockModel
-				root: 'Gene'
+				root: 'Protein'
+		@$(".imqb-container").append StartingView.render()
 		@$(".imqb").append StartingView.render()
+
 
 module.exports = AppView
