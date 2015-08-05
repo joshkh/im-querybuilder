@@ -3,48 +3,77 @@
 <div class="flexcol">
 
   <div class="flexcontent">
-    <div class="flexrow toolbar">
-      <div class="flexitem">
-        <span>Remove</span>
-      </div>
+    <div class="flexrow">
+      <span class="var collection flexitem cangrow"><%= model.get("desc") %></span>
     </div>
     <div class="flexrow">
-      <span class="flexitem canshrink">Starting with a</span>
-      <span class="var collection flexitem cangrow"><%= model.get("root") %></span>
-    </div>
-    <div class="flexrow">
-      <div class="flexitem">
-        <span>like</span>
+      <div class="flexitem filter">
+        <input type="text" class="filtertextbox" placeholder="filter"></input>
       </div>
-      <div class="flexitem">
-        <input type="text" placeholder="anything"></input>
+      <div class="flexitem values">
+        <span class="showlists">Specific Value<span>
+      </div>
+      <div class="flexitem listname">
+        <span class="showlists">From a list<span>
       </div>
     </div>
-    <div class="flexrow">
+    <!-- <div class="flexrow">
       <div class="flexlist">
         <% model.get('selected').each(function(next) { %>
           <div><%= _.last(next.get('parts')) %></div>
         <% }); %>
       </div>
-    </div>
-    <div class="flexrow toolbar">
-      <!-- <div class="flexitem">
-        <span>Add</span>
+    </div> -->
+
+    <% if (model.get("showorg") == true) { %>
+    <!-- <% if (typeof(date) !== "undefined") { %> -->
+      <div class="">
+      <div class="flexrow">
+        <span class="var collection flexitem cangrow">Organism</span>
       </div>
-      <div class="flexitem">
-        <span>Hide</span>
-      </div> -->
-      <div class="flexitem">
-        <span class="collection">Add</span>
+      <div class="flexrow">
+        <div class="flexitem filter">
+          <input type="text" class="filtertextbox" placeholder="filter"></input>
+        </div>
+        <div class="flexitem listname">
+          <select class="selectpicker">
+            <% model.get('pathValues').each(function(next) { %>
+
+              <% if (next.get('value') == "D. melanogaster") { %>
+                <option selected="selected"><%= next.get('value') %></option>
+              <% } else { %>
+                <option><%= next.get('value') %></option>
+                <% } %>
+            <% }); %>
+          </select>
+        </div>
+        <div class="flexitem listname">
+          <span class="showlists">From a list<span>
+        </div>
       </div>
+
     </div>
+  <% } %>
+
+  <div class="flexrow toolbar">
+    <div class="flexitem">
+      <span class="addtrack">Add Related Items</span>
+    </div>
+  </div>
+
+
 
   </div>
 
+
 </div>
+
+
 
 <div class="flexcol fullheight menu stubify">
 </div>
+
+
 
 <!--
 <div class="flexcol fullheight stubify">

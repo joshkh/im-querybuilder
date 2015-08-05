@@ -16,6 +16,9 @@ class BlockModel extends CoreModel
     constraints: null
     root: "Gene"
     pathinfo: null
+    pathValues: []
+    desc: null
+    showorg: false
 
   initialize: ->
     @on 'change:query', @changequery, @
@@ -28,6 +31,7 @@ class BlockModel extends CoreModel
     @set children: new BlockCollection
     @set selected: new AttributeCollection
     @set constraints: new ConstraintCollection
+    @set pathValues: new Backbone.Collection
 
     @get('service').makePath(@get('root')).then (path) => @set pathinfo: path
 
@@ -42,6 +46,13 @@ class BlockModel extends CoreModel
       @get('service').query(@get('query')).then (query) =>
         @set query: query
         @buildViewFromQuery()
+
+    @get('service').pathValues('Organism.shortName').then (results) =>
+      @get('pathValues').add {value: "(Any)"}
+      @get('pathValues').add results
+
+    if !@get('desc')? then @set desc: @get('root')
+    # debugger;
 
   getCollections: ->
     _.filter @get('pathinfo').getChildNodes(), (next) ->
@@ -79,7 +90,14 @@ class BlockModel extends CoreModel
     @get('selected').each (next) ->
       if !query.hasView next.id then query.addToSelect next.id
 
-    console.log "query is now", query
+    # console.log "query is now", query
+
+  countQuery: ->
+    deferred = Q.defer()
+    @get('query').count().then (c) ->
+      console.log "resolving c", c
+      deferred.resolve c
+    deferred.promise
 
   setLookupConstraint: (value) ->
 

@@ -6,6 +6,14 @@ BlockModel = require '../models/BlockModel'
 MenuView = require './MenuView'
 MenuModel = require '../models/MenuModel'
 
+TracksMenuView = require './TracksMenuView'
+TracksMenuModel = require '../models/TracksMenuModel'
+
+ListsMenuModel = require '../models/ListsMenuModel'
+ListsMenuView = require './ListsMenuView'
+
+Events = require '../utils/Events'
+
 
 console.log "$", $
 
@@ -15,8 +23,9 @@ class BlockView extends CoreView
 
   # template: require '../templates/uiblock.tpl'
   template: require '../templates/uiblockcard.tpl'
-  tagName: "div"
-  className: "temp"
+  # tagName: "div"
+  # className: "temp"
+
 
   events:
     "click .addblock": "addblock"
@@ -25,17 +34,97 @@ class BlockView extends CoreView
     "click .talkup": "buildQuery"
     "focusout .lookup": "setLookupConstraint"
     "click .collection": "renderMenu"
-    "click .item": "switchModel"
+    # "click .item": "switchModel"
     "mouseover .flexcontent": "mouseOver"
     "mouseleave .flexcontent": "mouseLeave"
+    "click .addtrack": "showTrackMenu"
+    "click .showlists": "showListsMenu"
+    "focus .filtertextbox": "hidelistbox"
+    "focusout .filtertextbox": "showlistbox"
+
+
+
+  runquery = ->
+    console.log "message receieved"
+
+  hidelistbox: ->
+    # @$el.find('.listname').addClass 'hideme'
+
+  showlistbox: ->
+    # @$el.find('.listname').removeClass 'hideme'
 
   initialize: ->
     console.log "checking out my model", @model
     @model.get('selected').on 'change', @render, @
+    Events.on 'runquery', @talk, @
+
+  talk: ->
+    if @model.get('top') == true
+      console.log "my model is", @model.countQuery
+      cc = @model.countQuery().then (c) =>
+        Events.trigger 'newcount', c
+      # console.log "cc", cc
+
 
   testfunc: ->
-    console.log "HELLO WORLD"
+    console.log "track selected bubbled to parent"
 
+  closeMenu: ->
+    @$('.menu').addClass('stubify')
+    console.log "model", @
+
+  addtrack: (track) ->
+    console.log "Adding track", track
+    parsed = track.target.dataset.track
+    console.log "plesae add", parsed
+    nexttrack = new BlockView
+      model: new BlockModel
+        root: 'Organism'
+        desc: parsed
+        valuefilter: true
+      template: 'test'
+    @$el.find(".flexcontent").append nexttrack.render()
+    console.log "nexttrack", nexttrack
+    @closeMenu()
+
+  showListsMenu: ->
+    @$el.find('.menu').addClass 'stubify'
+    if !@listsmenu?
+      lm = new ListsMenuModel root: 'Gene'
+      @listsmenu = new ListsMenuView model: lm
+      @listsmenu.on 'itemselected', @setList, @
+      @$el.find('.menu').html @listsmenu.render()
+      @$el.find('.menu').removeClass 'stubify'
+      @$el
+    else
+      # @$el.find('.menu').html @trackmenu.$el
+      @$el.find('.menu').html @listsmenu.render()
+      @$el.find('.menu').removeClass 'stubify'
+      @$el
+
+  showTrackMenu: (evt) ->
+    evt.stopPropagation()
+    @$el.find('.menu').addClass 'stubify'
+    if !@trackmenu?
+      tm = new TracksMenuModel root: 'Gene'
+      @trackmenu = new TracksMenuView model: tm
+      @trackmenu.on 'trackselected', @addtrack, @
+      @$el.find('.menu').html @trackmenu.render()
+      @$el.find('.menu').removeClass 'stubify'
+      @$el
+    else
+      # @$el.find('.menu').html @trackmenu.$el
+      @$el.find('.menu').html @trackmenu.render()
+      @$el.find('.menu').removeClass 'stubify'
+      @$el
+
+  setList: (val) ->
+    console.log "val", val
+    list = val.target.dataset.list
+    console.log "selected list", list
+    @$el.find('.showlists').text(list)
+    # @$el.find('.filter').addClass('hideme')
+    @closeMenu()
 
   mouseOver: ->
     # console.log "MouseOver"
@@ -120,27 +209,34 @@ class BlockView extends CoreView
 
   renderMenu: ->
 
+
+    @model.get('service').fetchLists().then (lists) ->
+      console.log "lists are", lists
+    # debugger;
+    @$el.find('.menu').addClass 'stubify'
     if !@menu?
       mm = new MenuModel paths: @model.getCollections()
       @menu = new MenuView model: mm
-
-
-    console.log "rendering menu"
-
-    @menu.settled().then =>
-
-      console.log "allowed"
-
-      @$el.find('.menu').html @menu.render()
-      @$el.find('.menu').toggleClass 'stubify'
-      @$el
+      @menu.settled().then =>
+        @$el.find('.menu').html @menu.render()
+        @$el.find('.menu').removeClass 'stubify'
+        @$el
+    else
+       @$el.find('.menu').html @menu.$el
+       @$el.find('.menu').removeClass 'stubify'
+       @$el
 
   render: ->
-    # console.log "Rendering UIBlock", @
     @$el.html @template {model: @model}
     @regions = @$el.find('.children-entities')
     @$el.addClass "flash"
     @mouseLeave()
+    @model.buildQuery()
+    # console.log "finished rendering", @
+
+    # body = $('body').find('#infopanel').text('running')
+    # console.log "body", body
+    @$el.find('.filtertextbox')[0].focus()
     @$el
 
 

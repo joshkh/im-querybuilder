@@ -2,14 +2,14 @@ Backbone  = require 'backbone'
 _         = require 'underscore'
 Q         = require 'q'
 CoreModel = require './CoreModel'
-TrackCollection = require './TrackCollection'
+# TrackCollection = require './TrackCollection'
 
 class TrackModel extends CoreModel
 
   defaults:
     query: null
     parent: null
-    children: new TrackCollection
+    # children: new TrackCollection
 
   constructor: ->
     super

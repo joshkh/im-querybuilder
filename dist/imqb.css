@@ -11812,8 +11812,7 @@ body {
   flex-direction: column;
 }
 .flexcol .flexcontent .toolbar {
-  font-size: 0.5em;
-  text-align: center;
+  text-align: right;
   padding: 15px;
   justify-content: space-around;
   -webkit-transition: visibility 0.2s linear, opacity 0.2s linear;
@@ -11823,7 +11822,7 @@ body {
   flex-direction: row;
 }
 .flexcol .flexcontent .flexrow .flexitem {
-  display: flex;
+  flex: 1;
   padding: 3px;
 }
 .flexcol .flexcontent .flexrow .canshrink {
@@ -11861,6 +11860,7 @@ body {
   flex: 1 0 auto;
   flex-direction: column;
   overflow-y: auto;
+  font-size: 0.5em;
 }
 .var {
   padding: 0 5px 0 5px;
@@ -11876,6 +11876,9 @@ body {
   background-color: teal;
   color: white;
 }
+.showlists {
+  color: grey;
+}
 input[type='text'] {
   border: none;
   background: transparent;
@@ -11887,6 +11890,42 @@ input[type='text']:focus {
   visibility: collapse;
   opacity: 0;
 }
+.hideme {
+  display: none;
+  opacity: 0;
+}
 .hidden {
   display: none;
+}
+.listname {
+  -webkit-transition: visibility 0.2s linear, opacity 0.2s linear;
+}
+.filter {
+  -webkit-transition: visibility 0.2s linear, opacity 0.2s linear;
+}
+select {
+  background: none;
+  border: none;
+  color: grey;
+}
+select:focus {
+  outline: 0;
+}
+.faint {
+  opacity: 0.4;
+}
+#infopanel {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  background: #999;
+  font-size: 3em;
+}
+#runme {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  background: #999;
+  font-size: 3em;
+  background: #a9ba57;
 }
