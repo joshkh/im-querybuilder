@@ -39,19 +39,14 @@ class BlockView extends CoreView
     "mouseleave .flexcontent": "mouseLeave"
     "click .addtrack": "showTrackMenu"
     "click .showlists": "showListsMenu"
-    "focus .filtertextbox": "hidelistbox"
-    "focusout .filtertextbox": "showlistbox"
+    "focusout .filtertextbox": "setLookupConstraint"
 
 
 
   runquery = ->
     console.log "message receieved"
 
-  hidelistbox: ->
-    # @$el.find('.listname').addClass 'hideme'
 
-  showlistbox: ->
-    # @$el.find('.listname').removeClass 'hideme'
 
   initialize: ->
     console.log "checking out my model", @model
@@ -63,11 +58,6 @@ class BlockView extends CoreView
       console.log "my model is", @model.countQuery
       cc = @model.countQuery().then (c) =>
         Events.trigger 'newcount', c
-      # console.log "cc", cc
-
-
-  testfunc: ->
-    console.log "track selected bubbled to parent"
 
   closeMenu: ->
     @$('.menu').addClass('stubify')
@@ -113,7 +103,6 @@ class BlockView extends CoreView
       @$el.find('.menu').removeClass 'stubify'
       @$el
     else
-      # @$el.find('.menu').html @trackmenu.$el
       @$el.find('.menu').html @trackmenu.render()
       @$el.find('.menu').removeClass 'stubify'
       @$el

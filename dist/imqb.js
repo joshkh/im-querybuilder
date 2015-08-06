@@ -347,7 +347,7 @@ module.exports={
       })(this));
       if (!!value) {
         this.get('query').addConstraint({
-          path: "Gene",
+          path: this.get('root'),
           op: "LOOKUP",
           value: value
         });
@@ -910,7 +910,7 @@ var _ = require('underscore');
 module.exports = function(obj){
 var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};
 with(obj||{}){
-__p+=' <div class="imqb-container"> <div id="infopanel">Calculating...</div> <div id="runme">Run</div> </div>';
+__p+=' <div class="imqb-container"> <div id="infopanel"> <div class="loader">Loading...</div> </div> <div id="runme">Run</div> </div>';
 }
 return __p;
 };
@@ -1198,17 +1198,12 @@ return __p;
       "mouseleave .flexcontent": "mouseLeave",
       "click .addtrack": "showTrackMenu",
       "click .showlists": "showListsMenu",
-      "focus .filtertextbox": "hidelistbox",
-      "focusout .filtertextbox": "showlistbox"
+      "focusout .filtertextbox": "setLookupConstraint"
     };
 
     runquery = function() {
       return console.log("message receieved");
     };
-
-    BlockView.prototype.hidelistbox = function() {};
-
-    BlockView.prototype.showlistbox = function() {};
 
     BlockView.prototype.initialize = function() {
       console.log("checking out my model", this.model);
@@ -1226,10 +1221,6 @@ return __p;
           };
         })(this));
       }
-    };
-
-    BlockView.prototype.testfunc = function() {
-      return console.log("track selected bubbled to parent");
     };
 
     BlockView.prototype.closeMenu = function() {

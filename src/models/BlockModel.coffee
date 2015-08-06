@@ -110,7 +110,7 @@ class BlockModel extends CoreModel
         @get('query').removeConstraint constraint
 
     if !!value then @get('query').addConstraint
-        path: "Gene"
+        path: @get('root')
         op: "LOOKUP"
         value: value
 

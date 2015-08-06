@@ -9,7 +9,9 @@
 
 <div class="imqb-container">
 
-  <div id="infopanel">Calculating...</div>
+  <div id="infopanel">
+    <div class="loader">Loading...</div>
+  </div>
   <div id="runme">Run</div>
 
 
